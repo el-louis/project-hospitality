@@ -1,0 +1,955 @@
+# DECISIONS.md
+
+> Project HOSPITALITY Decision Log
+
+This document records every important architectural, product, UX, and engineering decision made throughout the lifetime of Project HOSPITALITY.
+
+Purpose:
+
+- Prevent repeating discussions
+- Help new developers understand the project
+- Give AI assistants long-term memory
+- Preserve architectural consistency
+- Explain *why* decisions were made, not just *what* was built
+
+---
+
+# Decision Template
+
+Every decision must include:
+
+- Decision ID
+- Date
+- Status
+- Category
+- Problem
+- Options Considered
+- Decision
+- Reasoning
+- Consequences
+- Future Review
+
+Status values
+
+Accepted
+
+Proposed
+
+Deprecated
+
+Rejected
+
+Superseded
+
+---
+
+# DECISION-001
+
+Date
+
+2026-07-08
+
+Status
+
+Accepted
+
+Category
+
+Product Vision
+
+Problem
+
+Should this project be built specifically for Red Masai Apartments or as a reusable platform?
+
+Decision
+
+Build a reusable hospitality platform.
+
+Reasoning
+
+A reusable architecture allows multiple hospitality businesses to use the same software with branding customization.
+
+Consequences
+
+Higher initial complexity.
+
+Massively better long-term scalability.
+
+Future Review
+
+Version 2.
+
+---
+
+# DECISION-002
+
+Date
+
+2026-07-08
+
+Status
+
+Accepted
+
+Category
+
+Architecture
+
+Problem
+
+Choose project architecture.
+
+Options
+
+Separate repositories
+
+Monorepo
+
+Decision
+
+Monorepo.
+
+Reasoning
+
+Shared UI.
+
+Shared types.
+
+Shared utilities.
+
+Simpler deployments.
+
+Better developer experience.
+
+Consequences
+
+Slightly more setup.
+
+Better scalability.
+
+Future Review
+
+Never unless significant reasons exist.
+
+---
+
+# DECISION-003
+
+Category
+
+Frontend
+
+Problem
+
+Choose frontend framework.
+
+Options
+
+React
+
+Vue
+
+Angular
+
+Next.js
+
+Decision
+
+Next.js App Router.
+
+Reasoning
+
+Excellent SEO.
+
+Server Components.
+
+Performance.
+
+Production maturity.
+
+Future Review
+
+Major Next.js release.
+
+---
+
+# DECISION-004
+
+Category
+
+Backend
+
+Decision
+
+NestJS.
+
+Reasoning
+
+Enterprise architecture.
+
+Dependency Injection.
+
+Scalable modules.
+
+Excellent TypeScript support.
+
+---
+
+# DECISION-005
+
+Category
+
+Database
+
+Decision
+
+PostgreSQL.
+
+Reasoning
+
+Reliable.
+
+Open source.
+
+Scalable.
+
+Excellent Prisma support.
+
+---
+
+# DECISION-006
+
+Category
+
+ORM
+
+Decision
+
+Prisma.
+
+Reasoning
+
+Developer productivity.
+
+Type safety.
+
+Migration system.
+
+---
+
+# DECISION-007
+
+Category
+
+Styling
+
+Decision
+
+Tailwind CSS.
+
+Reasoning
+
+Consistency.
+
+Performance.
+
+Reusable design tokens.
+
+---
+
+# DECISION-008
+
+Date
+
+2026-07-09
+
+Status
+
+Accepted
+
+Category
+
+Availability
+
+Problem
+
+The booking flow needed an explicit way to prevent reservations from being created during blocked periods.
+
+Options Considered
+
+- Rely on manual coordination only
+- Add a lightweight in-memory availability service
+- Introduce a full calendar persistence layer immediately
+
+Decision
+
+Implement a lightweight availability service that stores blocked date ranges and blocks booking creation when a requested stay overlaps them.
+
+Reasoning
+
+The milestone should be shipped quickly, verified locally, and designed to support future calendar UI and persistence without overbuilding the current foundation.
+
+Consequences
+
+- Bookings now reject unavailable date ranges.
+- The API and frontend can expose availability state without a full database-backed calendar yet.
+- Future work can expand this into a richer calendar experience and persistence layer.
+
+Future Review
+
+Expand when interactive date selection and owner management workflows are implemented.
+
+---
+
+# DECISION-009
+
+Category
+
+Animation
+
+Decision
+
+Framer Motion.
+
+Reasoning
+
+Accessible animations.
+
+Modern API.
+
+High performance.
+
+---
+
+# DECISION-009
+
+Category
+
+Forms
+
+Decision
+
+React Hook Form + Zod.
+
+Reasoning
+
+Fast.
+
+Type-safe.
+
+Minimal rerenders.
+
+Excellent validation.
+
+---
+
+# DECISION-010
+
+Category
+
+Deployment
+
+Decision
+
+Frontend → Vercel
+
+Backend → Railway
+
+Database → Neon
+
+Images → Cloudinary
+
+Reasoning
+
+Fast setup.
+
+Excellent free tiers.
+
+Modern developer experience.
+
+---
+
+# DECISION-011
+
+Category
+
+Design
+
+Decision
+
+Luxury through simplicity.
+
+Reasoning
+
+Premium hospitality relies on trust, whitespace, and photography rather than visual clutter.
+
+---
+
+# DECISION-012
+
+Category
+
+Brand
+
+Decision
+
+Authentically Tanzanian.
+
+Reasoning
+
+Avoid generic luxury aesthetics.
+
+Represent Tanzania in a modern, respectful way through photography, materials, colors, and storytelling.
+
+---
+
+# DECISION-013
+
+Category
+
+UX
+
+Decision
+
+Mobile First.
+
+Reasoning
+
+Most users in Tanzania browse on smartphones.
+
+Desktop is secondary.
+
+---
+
+# DECISION-014
+
+Category
+
+Booking
+
+Decision
+
+Booking begins within 60 seconds.
+
+Reasoning
+
+Reduce friction.
+
+Every page moves the visitor closer to booking.
+
+---
+
+# DECISION-015
+
+Category
+
+Performance
+
+Decision
+
+Performance is a feature.
+
+Targets
+
+Performance >90
+
+Accessibility >95
+
+SEO >95
+
+Best Practices >95
+
+---
+
+# DECISION-016
+
+Category
+
+Accessibility
+
+Decision
+
+WCAG AA mandatory.
+
+Reasoning
+
+Accessibility improves usability for everyone.
+
+---
+
+# DECISION-017
+
+Category
+
+Components
+
+Decision
+
+Everything reusable.
+
+Reasoning
+
+Never duplicate components.
+
+Every reusable pattern belongs inside packages/ui.
+
+---
+
+# DECISION-018
+
+Category
+
+API
+
+Decision
+
+REST API first.
+
+Reasoning
+
+Simple.
+
+Predictable.
+
+Future GraphQL gateway possible.
+
+---
+
+# DECISION-019
+
+Category
+
+Database
+
+Decision
+
+Normalize data.
+
+Reasoning
+
+Reduce duplication.
+
+Improve consistency.
+
+---
+
+# DECISION-020
+
+Category
+
+Security
+
+Decision
+
+Zero Trust.
+
+Reasoning
+
+Never trust client input.
+
+Everything validated.
+
+Everything sanitized.
+
+---
+
+# DECISION-021
+
+Category
+
+Authentication
+
+Decision
+
+JWT Access Token.
+
+Refresh Token.
+
+Role Based Access Control.
+
+Reasoning
+
+Industry standard.
+
+Scalable.
+
+Secure.
+
+---
+
+# DECISION-022
+
+Category
+
+Internationalization
+
+Decision
+
+Architecture prepared for multiple languages.
+
+Initial language
+
+English.
+
+Future
+
+Swahili.
+
+French.
+
+Arabic.
+
+Reasoning
+
+Future expansion across Africa.
+
+---
+
+# DECISION-023
+
+Category
+
+Multi-Tenancy
+
+Decision
+
+Architecture should support multiple hospitality businesses.
+
+Reasoning
+
+Future SaaS platform.
+
+Each business should have:
+
+Own branding
+
+Own rooms
+
+Own bookings
+
+Own guests
+
+Own staff
+
+Own analytics
+
+---
+
+# DECISION-024
+
+Category
+
+Payments
+
+Decision
+
+Payment provider abstraction.
+
+Reasoning
+
+Never tightly couple to one payment provider.
+
+Possible integrations
+
+Flutterwave
+
+Selcom
+
+Stripe
+
+Pesapal
+
+Mobile Money
+
+---
+
+# DECISION-025
+
+Category
+
+Images
+
+Decision
+
+Cloudinary.
+
+Reasoning
+
+Automatic optimization.
+
+Responsive images.
+
+Fast CDN.
+
+---
+
+# DECISION-026
+
+Category
+
+Search
+
+Decision
+
+Server-side filtering first.
+
+Reasoning
+
+Simple.
+
+SEO friendly.
+
+Future full-text search possible.
+
+---
+
+# DECISION-027
+
+Category
+
+Documentation
+
+Decision
+
+Documentation is part of the product.
+
+Every feature must update:
+
+Architecture
+
+API
+
+Database
+
+Roadmap
+
+README
+
+Design System
+
+---
+
+# DECISION-028
+
+Category
+
+Git
+
+Decision
+
+Commit every milestone.
+
+Examples
+
+feat:
+
+fix:
+
+docs:
+
+refactor:
+
+test:
+
+style:
+
+Never commit unfinished experimental work to main.
+
+---
+
+# DECISION-029
+
+Category
+
+AI Collaboration
+
+Decision
+
+Every AI session starts by reading:
+
+PROJECT_RULES.md
+
+AI_CONTEXT.md
+
+DECISIONS.md
+
+Reasoning
+
+Maintain consistency.
+
+Avoid conflicting architecture.
+
+Prevent duplicated work.
+
+---
+
+# Stabilization Decisions
+
+# DECISION-030
+
+Date
+
+2026-07-15
+
+Status
+
+Accepted
+
+Category
+
+Repository Tooling
+
+Problem
+
+The documented pnpm and Turborepo direction did not match the npm lockfiles and installed npm-based applications.
+
+Decision
+
+Retain npm for the current stabilization phase and use npm workspaces with one root lockfile.
+
+Reasoning
+
+This removes workspace ambiguity and makes dependency ownership explicit without combining stabilization with a package-manager or build-system migration.
+
+Consequences
+
+- The root package is private and owns both application workspaces.
+- Application-level lockfiles are removed.
+- pnpm and Turborepo remain possible future migrations, not current requirements.
+
+Future Review
+
+Reconsider only as a separately planned tooling milestone.
+
+---
+
+# DECISION-031
+
+Date
+
+2026-07-15
+
+Status
+
+Accepted
+
+Category
+
+Backend Persistence
+
+Problem
+
+Planning documents selected Prisma, but the working backend is implemented and tested with TypeORM.
+
+Decision
+
+Retain TypeORM for the current stabilization phase.
+
+Reasoning
+
+Replacing the ORM would be an architectural migration unrelated to repository stabilization and would put working apartment behavior at risk.
+
+Consequences
+
+- Existing TypeORM apartment persistence remains unchanged.
+- E2e tests use a test-only `pg-mem` TypeORM data source and never connect to Neon.
+- Any Prisma migration requires its own design, migration, and verification milestone.
+
+Future Review
+
+Before expanding persistent domain models.
+
+---
+
+# DECISION-032
+
+Date
+
+2026-07-15
+
+Status
+
+Accepted
+
+Category
+
+Frontend Fonts
+
+Problem
+
+Google font imports required network access during production builds, and no approved local font files existed.
+
+Decision
+
+Use high-quality system font stacks until licensed local assets are explicitly approved.
+
+Reasoning
+
+System fonts make builds deterministic and avoid adding unreviewed font binaries.
+
+Consequences
+
+- Production builds have no external font-network dependency.
+- Brand typography may vary slightly by operating system.
+
+Future Review
+
+When approved brand font assets are available.
+
+---
+
+# Future Decisions
+
+Reserve this section for future architectural decisions.
+
+Examples
+
+Payment providers
+
+Recommendation engine
+
+Dynamic pricing
+
+Multi-property support
+
+AI concierge
+
+WhatsApp chatbot
+
+Channel manager
+
+Offline mode
+
+Native mobile apps
+
+Microservices migration
+
+Event-driven architecture
+
+Analytics platform
+
+Search engine
+
+Caching strategy
+
+Queue system
+
+Monitoring
+
+Logging
+
+Disaster recovery
+
+Security audits
+
+---
+
+# Final Principle
+
+Good software is not built by making perfect decisions.
+
+Good software is built by making clear decisions, documenting them, and improving them over time.
+
+If a better decision appears in the future, create a new decision rather than rewriting history.
+
+The goal is consistency, learning, and continuous improvement.
