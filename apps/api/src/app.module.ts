@@ -6,6 +6,8 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { Apartment } from './apartments/apartment.entity';
 import { User } from './users/user.entity';
 import { AuthSession } from './auth/auth-session.entity';
+import { AvailabilityBlock } from './availability/availability-block.entity';
+import { Booking } from './bookings/booking.entity';
 import { ApartmentsModule } from './apartments/apartments.module';
 import { AuthModule } from './auth/auth.module';
 import { AvailabilityModule } from './availability/availability.module';
@@ -36,7 +38,7 @@ import { UsersModule } from './users/users.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Apartment, User, AuthSession],
+      entities: [Apartment, User, AuthSession, Booking, AvailabilityBlock],
       migrations: [`${__dirname}/migrations/*{.ts,.js}`],
       migrationsRun: false,
       synchronize: false,

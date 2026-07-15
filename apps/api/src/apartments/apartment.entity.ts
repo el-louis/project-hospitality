@@ -4,7 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { AvailabilityBlock } from '../availability/availability-block.entity';
+import { Booking } from '../bookings/booking.entity';
 
 @Entity()
 export class Apartment {
@@ -49,4 +52,10 @@ export class Apartment {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Booking, (booking) => booking.apartment)
+  bookings: Booking[];
+
+  @OneToMany(() => AvailabilityBlock, (block) => block.apartment)
+  availabilityBlocks: AvailabilityBlock[];
 }

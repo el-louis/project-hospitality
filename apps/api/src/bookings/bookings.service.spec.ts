@@ -1,77 +1,59 @@
 import { BadRequestException } from '@nestjs/common';
-import { AvailabilityService } from '../availability/availability.service';
-import { BookingsService } from './bookings.service';
+import {
+  BOOKING_STATUS_TRANSITIONS,
+  isValidTransition,
+  validateDateRange,
+} from './booking-rules';
+import { BookingStatus } from './booking.entity';
 
-describe('BookingsService', () => {
-  let service: BookingsService;
-
-  beforeEach(() => {
-    service = new BookingsService(new AvailabilityService());
+describe('booking rules', () => {
+  it('uses half-open ranges that permit same-day turnover', () => {
+    expect(
+      validateDateRange(
+        { startDate: '2099-08-10', endDate: '2099-08-13' },
+        { rejectPastStart: true },
+      ),
+    ).toBe(3);
+    expect(
+      validateDateRange(
+        { startDate: '2099-08-13', endDate: '2099-08-14' },
+        { rejectPastStart: true },
+      ),
+    ).toBe(1);
   });
 
-  it('creates a confirmation for a valid booking request', () => {
-    const response = service.createBooking({
-      fullName: 'Amina Hassan',
-      email: 'amina@example.com',
-      phone: '+255712345678',
-      checkIn: '2026-08-10',
-      checkOut: '2026-08-13',
-      guests: 2,
-      apartmentPreference: 'Studio Garden View',
-      notes: 'Late arrival',
-    });
-
-    expect(response).toEqual(
-      expect.objectContaining({
-        message: expect.stringContaining('booking request'),
-        reference: expect.stringMatching(/^RM-/),
-        estimatedTotal: 450,
-      }),
-    );
-  });
-
-  it('rejects a checkout date that is not after the check-in date', () => {
+  it.each([
+    ['2099-08-13', '2099-08-13'],
+    ['2099-08-14', '2099-08-13'],
+    ['not-a-date', '2099-08-13'],
+  ])('rejects invalid range %s to %s', (startDate, endDate) => {
     expect(() =>
-      service.createBooking({
-        fullName: 'Amina Hassan',
-        email: 'amina@example.com',
-        phone: '+255712345678',
-        checkIn: '2026-08-13',
-        checkOut: '2026-08-10',
-        guests: 2,
-      }),
+      validateDateRange({ startDate, endDate }, { rejectPastStart: true }),
     ).toThrow(BadRequestException);
   });
 
-  it('stores a booking with the user id when provided', () => {
-    const response = service.createBooking(
-      {
-        fullName: 'Amina Hassan',
-        email: 'amina@example.com',
-        phone: '+255712345678',
-        checkIn: '2026-08-10',
-        checkOut: '2026-08-13',
-        guests: 2,
-      },
-      'user-demo',
-    );
-
-    expect(response.userId).toBe('user-demo');
+  it('rejects past check-in dates', () => {
+    expect(() =>
+      validateDateRange(
+        { startDate: '2020-01-01', endDate: '2020-01-02' },
+        { rejectPastStart: true },
+      ),
+    ).toThrow('Check-in cannot be in the past.');
   });
 
-  it('returns bookings belonging to a specific user', () => {
-    service.createBooking(
-      {
-        fullName: 'Amina Hassan',
-        email: 'amina@example.com',
-        phone: '+255712345678',
-        checkIn: '2026-08-10',
-        checkOut: '2026-08-13',
-        guests: 2,
-      },
-      'user-demo',
-    );
-
-    expect(service.getBookingsForUser('user-demo')).toHaveLength(1);
+  it('enforces the documented lifecycle transition table', () => {
+    expect(
+      isValidTransition(BookingStatus.PENDING, BookingStatus.CONFIRMED),
+    ).toBe(true);
+    expect(
+      isValidTransition(BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN),
+    ).toBe(true);
+    expect(
+      isValidTransition(BookingStatus.CHECKED_OUT, BookingStatus.PENDING),
+    ).toBe(false);
+    expect(
+      isValidTransition(BookingStatus.CANCELLED, BookingStatus.CHECKED_IN),
+    ).toBe(false);
+    expect(BOOKING_STATUS_TRANSITIONS[BookingStatus.NO_SHOW]).toEqual([]);
   });
 });

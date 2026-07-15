@@ -12,21 +12,22 @@ export type Apartment = {
 };
 
 export type BookingRequest = {
+  apartmentId: string;
   fullName: string;
   email: string;
   phone: string;
   checkIn: string;
   checkOut: string;
   guests: number;
-  apartmentPreference?: string;
   notes?: string;
 };
 
 export type BookingResponse = {
   message: string;
   reference: string;
-  estimatedTotal: number;
-  request: BookingRequest;
+  totalAmount: number;
+  currency: string;
+  status: BookingStatus;
 };
 
 export type AuthResponse = {
@@ -36,7 +37,7 @@ export type AuthResponse = {
     firstName?: string;
     lastName?: string;
     fullName?: string;
-    role: 'user' | 'owner' | 'admin';
+    role: "user" | "owner" | "admin";
   };
 };
 
@@ -54,7 +55,7 @@ export type ProfileResponse = {
   firstName: string;
   lastName: string;
   fullName: string;
-  role: 'user' | 'owner' | 'admin';
+  role: "user" | "owner" | "admin";
   phone?: string;
 };
 
@@ -65,17 +66,21 @@ export type ProfileUpdatePayload = {
 };
 
 export type BookingSummary = {
-  id: string;
   reference: string;
-  userId?: string;
-  fullName: string;
-  email: string;
-  phone: string;
+  apartment: Pick<Apartment, "title">;
   checkIn: string;
   checkOut: string;
   guests: number;
-  apartmentPreference?: string;
-  notes?: string;
-  estimatedTotal: number;
-  status: 'pending' | 'confirmed' | 'cancelled';
+  totalAmount: number;
+  currency: string;
+  status: BookingStatus;
+  createdAt: string;
 };
+
+export type BookingStatus =
+  | "pending"
+  | "confirmed"
+  | "checked_in"
+  | "checked_out"
+  | "cancelled"
+  | "no_show";

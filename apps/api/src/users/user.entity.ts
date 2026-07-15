@@ -7,6 +7,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AuthSession } from '../auth/auth-session.entity';
+import { AvailabilityBlock } from '../availability/availability-block.entity';
+import { Booking } from '../bookings/booking.entity';
 
 export enum UserRole {
   USER = 'user',
@@ -59,4 +61,10 @@ export class User {
 
   @OneToMany(() => AuthSession, (session) => session.user)
   sessions: AuthSession[];
+
+  @OneToMany(() => Booking, (booking) => booking.user)
+  bookings: Booking[];
+
+  @OneToMany(() => AvailabilityBlock, (block) => block.createdByUser)
+  availabilityBlocks: AvailabilityBlock[];
 }

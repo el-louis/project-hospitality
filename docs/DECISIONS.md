@@ -974,6 +974,54 @@ For every persistent schema change.
 
 ---
 
+# DECISION-035
+
+Date
+
+2026-07-15
+
+Status
+
+Accepted
+
+Category
+
+Bookings and Availability Persistence
+
+Problem
+
+Bookings and manual availability ranges were held in separate process-local maps, used a hard-coded rate, and could not safely prevent concurrent reservations.
+
+Options Considered
+
+- Persist bookings only and remove manual blocks
+- Persist manual blocks only and retain prototype bookings
+- Persist both, using the apartment row as the transaction serialization point
+- Add a PostgreSQL exclusion constraint requiring range and extension features
+
+Decision
+
+Persist bookings and manual availability blocks as normalized TypeORM entities. Active bookings and manual blocks jointly define unavailable dates. Serialize booking and blocking writes with a pessimistic lock on the owning apartment, recheck overlaps inside the transaction, and use half-open `[checkIn, checkOut)` ranges.
+
+Reasoning
+
+Both sources are required by the current guest and owner behavior. Apartment-row locking is supported by the existing TypeORM/PostgreSQL stack, keeps concurrency scoped per apartment, allows same-day turnover, and avoids adding an extension-dependent constraint that the isolated pg-mem suite cannot execute.
+
+Consequences
+
+- Pending, confirmed, and checked-in bookings block dates.
+- Cancelled, checked-out, and no-show bookings do not block dates.
+- Booking totals use the locked apartment nightly price and are stored as immutable snapshots.
+- Public booking creation remains available; verified sessions provide optional ownership.
+- Anonymous bookings cannot appear in authenticated history or be cancelled through an insecure reference-only flow.
+- A real-PostgreSQL concurrency test remains required before production deployment.
+
+Future Review
+
+Before multi-property scaling, channel-manager integration, or distributed write paths. Consider a PostgreSQL exclusion constraint as defense in depth if operational compatibility is established.
+
+---
+
 # Future Decisions
 
 Reserve this section for future architectural decisions.

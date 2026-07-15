@@ -4,7 +4,10 @@ import { Repository } from 'typeorm';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { User } from './user.entity';
 
-export type PublicUser = Omit<User, 'passwordHash' | 'sessions'> & {
+export type PublicUser = Omit<
+  User,
+  'passwordHash' | 'sessions' | 'bookings' | 'availabilityBlocks'
+> & {
   fullName: string;
 };
 

@@ -10,6 +10,8 @@ import { AppService } from '../src/app.service';
 import { AuthSession } from '../src/auth/auth-session.entity';
 import { AuthModule } from '../src/auth/auth.module';
 import { AvailabilityModule } from '../src/availability/availability.module';
+import { AvailabilityBlock } from '../src/availability/availability-block.entity';
+import { Booking } from '../src/bookings/booking.entity';
 import { BookingsModule } from '../src/bookings/bookings.module';
 import { User } from '../src/users/user.entity';
 import { UsersModule } from '../src/users/users.module';
@@ -31,6 +33,18 @@ database.public.registerFunction({
   returns: DataType.uuid,
   implementation: randomUUID,
   impure: true,
+});
+database.public.registerFunction({
+  name: 'char_length',
+  args: [DataType.text],
+  returns: DataType.integer,
+  implementation: (value: string) => value.length,
+});
+database.public.registerFunction({
+  name: 'upper',
+  args: [DataType.text],
+  returns: DataType.text,
+  implementation: (value: string) => value.toUpperCase(),
 });
 database.public.none(`
   CREATE TABLE apartment (
@@ -54,6 +68,33 @@ database.public.none(`
     replaced_by_session_id uuid, created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
   );
+  CREATE TABLE bookings (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(), reference varchar(32) UNIQUE NOT NULL,
+    apartment_id uuid NOT NULL REFERENCES apartment(id) ON DELETE RESTRICT,
+    user_id uuid REFERENCES users(id) ON DELETE SET NULL,
+    guest_first_name varchar(100) NOT NULL, guest_last_name varchar(100) NOT NULL,
+    guest_email varchar(320) NOT NULL, guest_phone varchar(30) NOT NULL,
+    check_in date NOT NULL, check_out date NOT NULL, guest_count integer NOT NULL,
+    nightly_rate_snapshot numeric(12,2) NOT NULL, total_amount numeric(12,2) NOT NULL,
+    currency varchar(3) NOT NULL DEFAULT 'USD', status text NOT NULL DEFAULT 'pending',
+    guest_notes text, internal_notes text, created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(), CHECK (check_out > check_in),
+    CHECK (guest_count > 0), CHECK (nightly_rate_snapshot >= 0 AND total_amount >= 0),
+    CHECK (char_length(currency) = 3 AND currency = upper(currency))
+  );
+  CREATE INDEX IDX_bookings_apartment_dates_status ON bookings(apartment_id, status, check_in, check_out);
+  CREATE INDEX IDX_bookings_user_created_at ON bookings(user_id, created_at);
+  CREATE INDEX IDX_bookings_status ON bookings(status);
+  CREATE TABLE availability_blocks (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    apartment_id uuid NOT NULL REFERENCES apartment(id) ON DELETE CASCADE,
+    start_date date NOT NULL, end_date date NOT NULL, reason varchar(500),
+    created_by_user_id uuid REFERENCES users(id) ON DELETE SET NULL,
+    created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(),
+    CHECK (end_date > start_date)
+  );
+  CREATE INDEX IDX_availability_blocks_apartment_dates ON availability_blocks(apartment_id, start_date, end_date);
+  CREATE INDEX IDX_availability_blocks_created_by ON availability_blocks(created_by_user_id);
 `);
 
 @Module({
@@ -62,7 +103,7 @@ database.public.none(`
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'postgres',
-        entities: [Apartment, User, AuthSession],
+        entities: [Apartment, User, AuthSession, Booking, AvailabilityBlock],
         synchronize: false,
         retryAttempts: 1,
       }),

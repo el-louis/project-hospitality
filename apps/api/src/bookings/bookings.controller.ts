@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { AuthorizationGuard } from '../auth/authorization.guard';
@@ -8,6 +16,7 @@ import { RolesGuard } from '../auth/roles.guard';
 import { UserRole } from '../users/user.entity';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 
 @Controller('bookings')
 export class BookingsController {
@@ -28,10 +37,38 @@ export class BookingsController {
     return this.bookingsService.getBookingsForUser(user.id);
   }
 
-  @Get('user/:userId')
+  @Get('reference/:reference')
+  @UseGuards(AuthorizationGuard)
+  getByReference(
+    @Param('reference') reference: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.bookingsService.getBookingByReference(reference, user);
+  }
+
+  @Get()
   @UseGuards(AuthorizationGuard, RolesGuard)
   @Roles(UserRole.OWNER, UserRole.ADMIN)
-  getUserBookings(@Param('userId') userId: string) {
-    return this.bookingsService.getBookingsForUser(userId);
+  listBookings() {
+    return this.bookingsService.listBookings();
+  }
+
+  @Patch(':reference/status')
+  @UseGuards(AuthorizationGuard, RolesGuard)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  updateStatus(
+    @Param('reference') reference: string,
+    @Body() payload: UpdateBookingStatusDto,
+  ) {
+    return this.bookingsService.updateStatus(reference, payload.status);
+  }
+
+  @Post(':reference/cancel')
+  @UseGuards(AuthorizationGuard)
+  cancel(
+    @Param('reference') reference: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.bookingsService.cancelBooking(reference, user);
   }
 }

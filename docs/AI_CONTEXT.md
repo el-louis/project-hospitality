@@ -92,10 +92,13 @@ Verified completed work in the current workspace:
 - Ownership-derived profile and booking-history access
 - Role-protected apartment and availability mutations
 - Global API DTO validation, rate limiting, secure headers, and migration-based auth schema
+- PostgreSQL-backed bookings with server-generated references and price snapshots
+- PostgreSQL-backed manual availability blocks
+- Transactional overlap prevention using apartment row locks and half-open date ranges
+- Persisted authenticated booking history, anonymous booking support, cancellation, and staff lifecycle controls
 
 Verified remaining work:
 
-- Persist bookings in PostgreSQL
 - Expand availability calendar UI with interactive date selection
 - Property owner workflows
 - Admin dashboard
@@ -116,11 +119,11 @@ Verified remaining work:
 
 Recommended next milestone:
 
-Persist bookings in PostgreSQL and link them to the authenticated user identity without expanding into payments or marketplace features.
+Review and apply the persisted-booking migration in a controlled development-database operation, then expand the availability calendar UI without adding payment or marketplace scope.
 
 Roadmap sequence:
 
-Persist bookings in PostgreSQL → Authentication → Authorization → User accounts and profiles → Link bookings to authenticated users → Expand availability calendar UI → Property management → Payments → Admin dashboard → Reviews and ratings → Notifications → Search and filters → Analytics → SEO → Performance and accessibility → Testing → Production deployment
+Apply persisted-booking migration → Expand availability calendar UI → Property management → Payments → Admin dashboard → Reviews and ratings → Notifications → Search and filters → Analytics → SEO → Performance and accessibility → Testing → Production deployment
 
 ---
 
