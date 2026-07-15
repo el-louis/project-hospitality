@@ -19,29 +19,27 @@ This audit records the read-only baseline established before the first repositor
 - `apps/api`: NestJS 11, TypeORM, PostgreSQL, TypeScript.
 - `packages/ui` and `packages/types`: reserved but not yet active shared packages.
 - Apartment records use PostgreSQL through TypeORM.
-- Authentication, profiles, bookings, and availability are prototype in-memory services.
+- Users and authentication sessions are persisted through TypeORM; bookings and availability remain prototype in-memory services.
 
 ## Verified Working Behavior
 
 - Apartment CRUD API and apartment listing/detail UI.
 - Booking request form, booking creation, estimated totals, and availability overlap checks.
-- Prototype registration, login, profile, booking-history, and role-guard flows.
+- Argon2id registration/login, rotated refresh sessions, authenticated profiles, booking ownership, and role guards.
 - Backend unit suite and isolated backend e2e smoke test.
 - Backend and frontend production builds.
 
 ## Material Risks
 
-- Prototype authentication stores plaintext passwords, uses a custom non-expiring token, permits an `x-role` header fallback, and has a development signing-secret fallback. It is not production-ready.
-- Authentication, users, bookings, and availability are lost when the API restarts.
-- Authorization does not consistently enforce resource ownership.
-- Several write endpoints lack production-grade authentication and validation.
-- TypeORM `synchronize: true` is unsafe for production schema management.
+- Bookings and availability are lost when the API restarts.
+- Email verification, recovery, MFA, distributed rate limiting, and deployment-specific security testing are deferred.
+- The authentication migration has not been applied to a production database.
 - Backend TypeScript settings are less strict than the project rules require.
 - The design-system, architecture, API, and database documents referenced by the project instructions are not yet present.
 - The current UI remains an early implementation and has not completed accessibility, security, SEO, or performance audits.
 
 ## Dependency and Build Risks
 
-- npm reported two moderate dependency vulnerabilities during workspace installation; no forced audit fix was applied.
+- The Milestone 2 dependency installation reported no known npm vulnerabilities at installation time; ongoing monitoring remains required.
 - System font stacks are used because no approved local font binaries exist and production builds must not require font downloads.
 - The isolated e2e database is an in-memory PostgreSQL-compatible `pg-mem` instance and does not validate behavior against a real PostgreSQL server.

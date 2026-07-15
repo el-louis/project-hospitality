@@ -1,17 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { AvailabilityService } from '../availability/availability.service';
 import type { BookingRecord } from './booking.entity';
-
-export type BookingRequest = {
-  fullName: string;
-  email: string;
-  phone: string;
-  checkIn: string;
-  checkOut: string;
-  guests: number;
-  apartmentPreference?: string;
-  notes?: string;
-};
+import { CreateBookingDto } from './dto/create-booking.dto';
 
 @Injectable()
 export class BookingsService {
@@ -19,12 +9,14 @@ export class BookingsService {
 
   constructor(private readonly availabilityService: AvailabilityService) {}
 
-  createBooking(request: BookingRequest, userId?: string) {
+  createBooking(request: CreateBookingDto, userId?: string) {
     const checkIn = new Date(request.checkIn);
     const checkOut = new Date(request.checkOut);
 
     if (Number.isNaN(checkIn.getTime()) || Number.isNaN(checkOut.getTime())) {
-      throw new BadRequestException('Please provide valid check-in and check-out dates.');
+      throw new BadRequestException(
+        'Please provide valid check-in and check-out dates.',
+      );
     }
 
     if (checkOut <= checkIn) {
@@ -32,13 +24,21 @@ export class BookingsService {
     }
 
     const apartmentId = request.apartmentPreference ?? 'default-apartment';
-    const isAvailable = this.availabilityService.isAvailable(apartmentId, request.checkIn, request.checkOut);
+    const isAvailable = this.availabilityService.isAvailable(
+      apartmentId,
+      request.checkIn,
+      request.checkOut,
+    );
 
     if (!isAvailable) {
-      throw new BadRequestException('The selected dates are not available for this apartment.');
+      throw new BadRequestException(
+        'The selected dates are not available for this apartment.',
+      );
     }
 
-    const nights = Math.round((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+    const nights = Math.round(
+      (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24),
+    );
     const nightlyRate = 150;
     const estimatedTotal = nights * nightlyRate;
 
@@ -61,7 +61,8 @@ export class BookingsService {
     this.bookings.set(booking.reference, booking);
 
     return {
-      message: 'Your booking request has been received. We will contact you shortly.',
+      message:
+        'Your booking request has been received. We will contact you shortly.',
       reference: booking.reference,
       estimatedTotal,
       request,
@@ -70,6 +71,8 @@ export class BookingsService {
   }
 
   getBookingsForUser(userId: string): BookingRecord[] {
-    return Array.from(this.bookings.values()).filter((booking) => booking.userId === userId);
+    return Array.from(this.bookings.values()).filter(
+      (booking) => booking.userId === userId,
+    );
   }
 }

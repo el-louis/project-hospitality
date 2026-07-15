@@ -1,54 +1,92 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { User } from './user.entity';
 
-export type UserProfile = {
-  id: string;
-  email: string;
+export type PublicUser = Omit<User, 'passwordHash' | 'sessions'> & {
   fullName: string;
-  role: 'guest' | 'user' | 'owner';
-  phone?: string;
-  location?: string;
-  bio?: string;
 };
 
 @Injectable()
 export class UsersService {
-  private readonly profiles = new Map<string, UserProfile>();
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
 
-  constructor() {
-    this.profiles.set('user-demo', {
-      id: 'user-demo',
-      email: 'guest@example.com',
-      fullName: 'Guest User',
-      role: 'user',
-      phone: '+255712345678',
-      location: 'Dar es Salaam',
-      bio: 'Guest traveler using the platform.',
+  async create(
+    data: Pick<
+      User,
+      'firstName' | 'lastName' | 'email' | 'phone' | 'passwordHash'
+    >,
+  ): Promise<User> {
+    return this.usersRepository.save(this.usersRepository.create(data));
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { email: email.toLowerCase() },
     });
   }
 
-  getProfile(id: string): UserProfile {
-    const profile = this.profiles.get(id);
-
-    if (!profile) {
-      throw new NotFoundException('User profile not found.');
-    }
-
-    return profile;
+  async findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('LOWER(user.email) = LOWER(:email)', { email })
+      .getOne();
   }
 
-  updateProfile(id: string, updates: Partial<UserProfile>): UserProfile {
-    const existing = this.profiles.get(id);
-
-    if (!existing) {
-      throw new NotFoundException('User profile not found.');
-    }
-
-    const updated = { ...existing, ...updates, id };
-    this.profiles.set(id, updated);
-    return updated;
+  async findById(id: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User profile not found.');
+    return user;
   }
 
-  seedProfile(profile: UserProfile) {
-    this.profiles.set(profile.id, profile);
+  async findByIdWithPassword(id: string): Promise<User> {
+    const user = await this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('user.id = :id', { id })
+      .getOne();
+    if (!user) throw new NotFoundException('User profile not found.');
+    return user;
+  }
+
+  async updateProfile(
+    id: string,
+    updates: UpdateProfileDto,
+  ): Promise<PublicUser> {
+    const user = await this.findById(id);
+    Object.assign(user, updates);
+    return this.toPublicUser(await this.usersRepository.save(user));
+  }
+
+  async updatePassword(user: User, passwordHash: string): Promise<void> {
+    user.passwordHash = passwordHash;
+    await this.usersRepository.save(user);
+  }
+
+  async recordLogin(user: User): Promise<void> {
+    user.lastLoginAt = new Date();
+    await this.usersRepository.save(user);
+  }
+
+  toPublicUser(user: User): PublicUser {
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: `${user.firstName} ${user.lastName}`.trim(),
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      status: user.status,
+      emailVerified: user.emailVerified,
+      lastLoginAt: user.lastLoginAt,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 }

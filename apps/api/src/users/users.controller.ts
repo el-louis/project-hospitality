@@ -1,24 +1,27 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
-import { Roles } from '../auth/roles.decorator';
-import { RolesGuard } from '../auth/roles.guard';
+import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import { AuthorizationGuard } from '../auth/authorization.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import type { AuthenticatedUser } from '../auth/auth.types';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
+@UseGuards(AuthorizationGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get(':id')
-  @UseGuards(AuthorizationGuard, RolesGuard)
-  @Roles('user', 'owner')
-  getProfile(@Param('id') id: string) {
-    return this.usersService.getProfile(id);
+  @Get('me')
+  async getProfile(@CurrentUser() activeUser: AuthenticatedUser) {
+    return this.usersService.toPublicUser(
+      await this.usersService.findById(activeUser.id),
+    );
   }
 
-  @Patch(':id')
-  @UseGuards(AuthorizationGuard, RolesGuard)
-  @Roles('user', 'owner')
-  updateProfile(@Param('id') id: string, @Body() updates: Record<string, unknown>) {
-    return this.usersService.updateProfile(id, updates as any);
+  @Patch('me')
+  updateProfile(
+    @CurrentUser() activeUser: AuthenticatedUser,
+    @Body() updates: UpdateProfileDto,
+  ) {
+    return this.usersService.updateProfile(activeUser.id, updates);
   }
 }

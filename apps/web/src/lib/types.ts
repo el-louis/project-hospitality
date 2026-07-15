@@ -30,17 +30,20 @@ export type BookingResponse = {
 };
 
 export type AuthResponse = {
-  accessToken: string;
   user: {
     id: string;
     email: string;
-    fullName: string;
-    role: 'guest' | 'user' | 'owner';
+    firstName?: string;
+    lastName?: string;
+    fullName?: string;
+    role: 'user' | 'owner' | 'admin';
   };
 };
 
 export type AuthFormState = {
-  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
   email: string;
   password: string;
 };
@@ -48,18 +51,17 @@ export type AuthFormState = {
 export type ProfileResponse = {
   id: string;
   email: string;
+  firstName: string;
+  lastName: string;
   fullName: string;
-  role: 'guest' | 'user' | 'owner';
+  role: 'user' | 'owner' | 'admin';
   phone?: string;
-  location?: string;
-  bio?: string;
 };
 
 export type ProfileUpdatePayload = {
-  fullName?: string;
+  firstName?: string;
+  lastName?: string;
   phone?: string;
-  location?: string;
-  bio?: string;
 };
 
 export type BookingSummary = {

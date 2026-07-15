@@ -15,7 +15,8 @@ export class ApartmentsService {
     return this.apartmentsRepository.find();
   }
 
-  async findOne(id: string): Promise<Apartment | null> {  // <-- Update return type
+  async findOne(id: string): Promise<Apartment | null> {
+    // <-- Update return type
     return this.apartmentsRepository.findOne({ where: { id } });
   }
 
@@ -23,7 +24,11 @@ export class ApartmentsService {
     return this.apartmentsRepository.save(apartment);
   }
 
-  async update(id: string, apartment: Partial<Apartment>): Promise<Apartment | null> {  // <-- Update return type
+  async update(
+    id: string,
+    apartment: Partial<Apartment>,
+  ): Promise<Apartment | null> {
+    // <-- Update return type
     await this.apartmentsRepository.update(id, apartment);
     return this.apartmentsRepository.findOne({ where: { id } });
   }

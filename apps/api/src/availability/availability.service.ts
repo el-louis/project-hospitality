@@ -16,11 +16,18 @@ export class AvailabilityService {
     return this.ranges.get(apartmentId) ?? [];
   }
 
-  blockDates(apartmentId: string, range: Omit<AvailabilityRange, 'apartmentId'>) {
+  blockDates(
+    apartmentId: string,
+    range: Omit<AvailabilityRange, 'apartmentId'>,
+  ) {
     const start = new Date(range.startDate);
     const end = new Date(range.endDate);
 
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+    if (
+      Number.isNaN(start.getTime()) ||
+      Number.isNaN(end.getTime()) ||
+      end <= start
+    ) {
       throw new BadRequestException('Please provide a valid range of dates.');
     }
 
@@ -30,11 +37,19 @@ export class AvailabilityService {
     return updated;
   }
 
-  isAvailable(apartmentId: string, startDate: string, endDate: string): boolean {
+  isAvailable(
+    apartmentId: string,
+    startDate: string,
+    endDate: string,
+  ): boolean {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+    if (
+      Number.isNaN(start.getTime()) ||
+      Number.isNaN(end.getTime()) ||
+      end <= start
+    ) {
       throw new BadRequestException('Please provide a valid range of dates.');
     }
 

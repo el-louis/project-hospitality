@@ -898,6 +898,82 @@ When approved brand font assets are available.
 
 ---
 
+# DECISION-033
+
+Date
+
+2026-07-15
+
+Status
+
+Accepted
+
+Category
+
+Authentication
+
+Problem
+
+The prototype stored plaintext passwords and non-expiring custom tokens in memory and trusted client-controlled identity headers.
+
+Decision
+
+Persist users and refresh sessions with TypeORM, hash passwords and refresh tokens with Argon2id, issue 15-minute JWT access tokens, rotate seven-day opaque refresh tokens, and deliver browser credentials through HttpOnly SameSite cookies.
+
+Reasoning
+
+This separates identity proof from role authorization, supports revocation, avoids JavaScript-readable credentials, and fits the existing NestJS modular monolith.
+
+Consequences
+
+- The demo in-memory identity is reset rather than migrated.
+- Authentication requires PostgreSQL and a mandatory JWT signing secret.
+- Logout and password change revoke persisted sessions.
+- Cross-site cookie deployment would require a separate CSRF design.
+
+Future Review
+
+Before email verification, recovery, MFA, or cross-site deployment.
+
+---
+
+# DECISION-034
+
+Date
+
+2026-07-15
+
+Status
+
+Accepted
+
+Category
+
+Database Safety
+
+Problem
+
+Automatic TypeORM synchronization was enabled against the configured PostgreSQL database.
+
+Decision
+
+Disable synchronization and manage the authentication schema through reviewed TypeORM migrations.
+
+Reasoning
+
+Explicit migrations preserve existing data and make schema changes reviewable and repeatable.
+
+Consequences
+
+- Deployments must run migrations as a controlled operational step.
+- The authentication migration is additive and leaves apartment data unchanged.
+
+Future Review
+
+For every persistent schema change.
+
+---
+
 # Future Decisions
 
 Reserve this section for future architectural decisions.

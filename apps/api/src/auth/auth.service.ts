@@ -1,152 +1,220 @@
-import { createHash } from 'node:crypto';
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { randomBytes } from 'node:crypto';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as argon2 from 'argon2';
+import { IsNull, Repository } from 'typeorm';
+import { AccountStatus, User } from '../users/user.entity';
+import { PublicUser, UsersService } from '../users/users.service';
+import { AuthSession } from './auth-session.entity';
+import type { AccessTokenPayload, AuthenticatedUser } from './auth.types';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
-export type AuthenticatedUser = {
-  id: string;
-  email: string;
-  fullName: string;
-  role: 'guest' | 'user' | 'owner';
-};
+const ACCESS_TOKEN_TTL = '15m';
+const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
-export type LoginDto = {
-  email: string;
-  password: string;
-};
-
-export type RegisterDto = {
-  email: string;
-  password: string;
-  fullName: string;
-};
-
-export type AuthResponse = {
+export type AuthResult = {
+  user: PublicUser;
   accessToken: string;
-  user: AuthenticatedUser;
+  refreshToken: string;
 };
 
 @Injectable()
 export class AuthService {
-  private readonly users = new Map<string, { id: string; email: string; password: string; fullName: string; role: 'guest' | 'user' | 'owner' }>();
-  private readonly signingSecret = process.env.AUTH_SECRET || 'hospitality-dev-secret';
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    @InjectRepository(AuthSession)
+    private readonly sessionsRepository: Repository<AuthSession>,
+  ) {}
 
-  constructor(private readonly usersService: UsersService) {
-    this.users.set('guest@example.com', {
-      id: 'user-demo',
-      email: 'guest@example.com',
-      password: 'Welcome123!',
-      fullName: 'Guest User',
-      role: 'user',
-    });
-
-    this.usersService.seedProfile({
-      id: 'user-demo',
-      email: 'guest@example.com',
-      fullName: 'Guest User',
-      role: 'user',
-      phone: '+255712345678',
-      location: 'Dar es Salaam',
-      bio: 'Guest traveler using the platform.',
-    });
-  }
-
-  register(payload: RegisterDto): AuthResponse {
-    const normalizedEmail = payload.email.toLowerCase();
-
-    if (this.users.has(normalizedEmail)) {
-      throw new BadRequestException('An account with this email already exists.');
+  async register(payload: RegisterDto): Promise<AuthResult> {
+    const email = payload.email.trim().toLowerCase();
+    if (await this.usersService.findByEmail(email)) {
+      throw new ConflictException('An account with this email already exists.');
     }
 
-    const user = {
-      id: `user-${this.users.size + 1}`,
-      email: normalizedEmail,
-      password: payload.password,
-      fullName: payload.fullName,
-      role: 'user' as const,
-    };
-
-    this.users.set(user.email, user);
-    this.usersService.seedProfile({
-      id: user.id,
-      email: user.email,
-      fullName: user.fullName,
-      role: user.role,
+    const user = await this.usersService.create({
+      firstName: payload.firstName.trim(),
+      lastName: payload.lastName.trim(),
+      email,
+      phone: payload.phone?.trim() || null,
+      passwordHash: await this.hashSecret(payload.password),
     });
 
-    return this.buildAuthResponse(user);
+    return this.createSession(user);
   }
 
-  login(payload: LoginDto): AuthResponse {
-    const user = this.users.get(payload.email.toLowerCase());
+  async login(payload: LoginDto): Promise<AuthResult> {
+    const user = await this.usersService.findByEmailWithPassword(
+      payload.email.trim().toLowerCase(),
+    );
+    const passwordValid = user
+      ? await argon2.verify(user.passwordHash, payload.password)
+      : false;
 
-    if (!user || user.password !== payload.password) {
+    if (!user || !passwordValid || user.status !== AccountStatus.ACTIVE) {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
-    return this.buildAuthResponse(user);
+    await this.usersService.recordLogin(user);
+    return this.createSession(user);
   }
 
-  validateToken(token: string): AuthenticatedUser {
-    const [encodedPayload, signature] = token.split('.');
+  async refresh(refreshToken: string): Promise<AuthResult> {
+    const session = await this.getValidSession(refreshToken);
+    const tokenValid = await argon2.verify(
+      session.refreshTokenHash,
+      refreshToken,
+    );
+    if (!tokenValid) throw new UnauthorizedException('Invalid session.');
 
-    if (!encodedPayload || !signature) {
-      throw new UnauthorizedException('Invalid access token.');
+    const user = session.user;
+    if (user.status !== AccountStatus.ACTIVE)
+      throw new UnauthorizedException('Invalid session.');
+
+    const claimed = await this.sessionsRepository.update(
+      { id: session.id, revokedAt: IsNull() },
+      { revokedAt: new Date() },
+    );
+    if (claimed.affected !== 1) {
+      throw new UnauthorizedException('Invalid session.');
     }
 
-    const expectedSignature = createHash('sha256')
-      .update(`${encodedPayload}:${this.signingSecret}`)
-      .digest('hex');
+    const replacement = await this.createSession(user);
+    await this.sessionsRepository.update(session.id, {
+      replacedBySessionId: this.parseRefreshToken(replacement.refreshToken)
+        .sessionId,
+    });
+    return replacement;
+  }
 
-    if (signature !== expectedSignature) {
-      throw new UnauthorizedException('Invalid access token.');
+  async logout(refreshToken?: string, sessionId?: string): Promise<void> {
+    const id = refreshToken
+      ? this.parseRefreshToken(refreshToken).sessionId
+      : sessionId;
+    if (!id) return;
+    await this.sessionsRepository.update(
+      { id, revokedAt: IsNull() },
+      { revokedAt: new Date() },
+    );
+  }
+
+  async changePassword(
+    userId: string,
+    payload: ChangePasswordDto,
+  ): Promise<void> {
+    const user = await this.usersService.findByIdWithPassword(userId);
+    if (!(await argon2.verify(user.passwordHash, payload.currentPassword))) {
+      throw new UnauthorizedException('Current password is incorrect.');
     }
+    await this.usersService.updatePassword(
+      user,
+      await this.hashSecret(payload.newPassword),
+    );
+    await this.sessionsRepository.update(
+      { userId, revokedAt: IsNull() },
+      { revokedAt: new Date() },
+    );
+  }
 
-    const decodedPayload = Buffer.from(encodedPayload, 'base64url').toString('utf8');
-
+  async validateAccessToken(token: string): Promise<AuthenticatedUser> {
     try {
-      const payload = JSON.parse(decodedPayload) as Partial<AuthenticatedUser> & { iat?: number };
-
-      if (!payload.id || !payload.email || !payload.fullName || !payload.role) {
-        throw new Error('Missing claims');
+      const payload = await this.jwtService.verifyAsync<AccessTokenPayload>(
+        token,
+        {
+          secret: this.requireSecret(),
+        },
+      );
+      const session = await this.sessionsRepository.findOne({
+        where: { id: payload.sid, userId: payload.sub, revokedAt: IsNull() },
+        relations: { user: true },
+      });
+      if (
+        !session ||
+        session.expiresAt <= new Date() ||
+        session.user.status !== AccountStatus.ACTIVE
+      ) {
+        throw new UnauthorizedException('Invalid access token.');
       }
-
       return {
-        id: payload.id,
-        email: payload.email,
-        fullName: payload.fullName,
-        role: payload.role,
+        id: payload.sub,
+        email: session.user.email,
+        role: session.user.role,
+        sessionId: payload.sid,
       };
     } catch {
-      throw new UnauthorizedException('Invalid access token.');
+      throw new UnauthorizedException('Invalid or expired access token.');
     }
   }
 
-  private buildAuthResponse(user: { id: string; email: string; fullName: string; role: 'guest' | 'user' | 'owner' }) {
-    return {
-      accessToken: this.issueToken(user),
-      user: {
-        id: user.id,
+  private async createSession(user: User): Promise<AuthResult> {
+    const session = await this.sessionsRepository.save(
+      this.sessionsRepository.create({
+        userId: user.id,
+        refreshTokenHash: 'pending',
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS),
+      }),
+    );
+    const refreshToken = `${session.id}.${randomBytes(48).toString('base64url')}`;
+    session.refreshTokenHash = await this.hashSecret(refreshToken);
+    await this.sessionsRepository.save(session);
+
+    const accessToken = await this.jwtService.signAsync(
+      {
+        sub: user.id,
         email: user.email,
-        fullName: user.fullName,
         role: user.role,
-      },
+        sid: session.id,
+      } satisfies AccessTokenPayload,
+      { secret: this.requireSecret(), expiresIn: ACCESS_TOKEN_TTL },
+    );
+    return {
+      user: this.usersService.toPublicUser(user),
+      accessToken,
+      refreshToken,
     };
   }
 
-  private issueToken(user: { id: string; email: string; fullName: string; role: 'guest' | 'user' | 'owner' }) {
-    const payload = {
-      id: user.id,
-      email: user.email,
-      fullName: user.fullName,
-      role: user.role,
-      iat: Date.now(),
-    };
+  private async getValidSession(refreshToken: string): Promise<AuthSession> {
+    const { sessionId } = this.parseRefreshToken(refreshToken);
+    const session = await this.sessionsRepository
+      .createQueryBuilder('session')
+      .addSelect('session.refreshTokenHash')
+      .leftJoinAndSelect('session.user', 'user')
+      .where('session.id = :sessionId', { sessionId })
+      .andWhere('session.revokedAt IS NULL')
+      .getOne();
+    if (!session || session.expiresAt <= new Date())
+      throw new UnauthorizedException('Invalid session.');
+    return session;
+  }
 
-    const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
-    const signature = createHash('sha256')
-      .update(`${encodedPayload}:${this.signingSecret}`)
-      .digest('hex');
+  private parseRefreshToken(token: string): { sessionId: string } {
+    const [sessionId, secret, ...extra] = token.split('.');
+    if (!sessionId || !secret || extra.length)
+      throw new UnauthorizedException('Invalid session.');
+    return { sessionId };
+  }
 
-    return `${encodedPayload}.${signature}`;
+  private hashSecret(value: string): Promise<string> {
+    return argon2.hash(value, {
+      type: argon2.argon2id,
+      memoryCost: 19456,
+      timeCost: 2,
+      parallelism: 1,
+    });
+  }
+
+  private requireSecret(): string {
+    return this.configService.getOrThrow<string>('JWT_ACCESS_SECRET');
   }
 }

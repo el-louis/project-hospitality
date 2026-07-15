@@ -1,29 +1,21 @@
-import { NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { AccountStatus, User, UserRole } from './user.entity';
 
 describe('UsersService', () => {
-  let service: UsersService;
-
-  beforeEach(() => {
-    service = new UsersService();
-  });
-
-  it('returns a seeded user profile', () => {
-    expect(service.getProfile('user-demo')).toEqual(
-      expect.objectContaining({
-        id: 'user-demo',
-        email: 'guest@example.com',
-      }),
-    );
-  });
-
-  it('updates an existing profile', () => {
-    const updated = service.updateProfile('user-demo', { location: 'Arusha' });
-
-    expect(updated.location).toBe('Arusha');
-  });
-
-  it('throws when a profile does not exist', () => {
-    expect(() => service.getProfile('missing')).toThrow(NotFoundException);
+  it('removes password hashes from public user responses', () => {
+    const service = new UsersService({} as any);
+    const result = service.toPublicUser({
+      id: '1',
+      firstName: 'Amina',
+      lastName: 'Hassan',
+      email: 'amina@example.com',
+      passwordHash: 'secret-hash',
+      role: UserRole.USER,
+      status: AccountStatus.ACTIVE,
+      emailVerified: false,
+      sessions: [],
+    } as User);
+    expect(result.fullName).toBe('Amina Hassan');
+    expect(result).not.toHaveProperty('passwordHash');
   });
 });

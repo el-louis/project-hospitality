@@ -1,23 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getStoredSession, getUserBookings } from '@/lib/api';
+import { AUTH_STATE_EVENT, getUserBookings } from '@/lib/api';
 import type { BookingSummary } from '@/lib/types';
 
-type BookingHistoryProps = {
-  userId?: string;
-};
-
-export function BookingHistory({ userId }: BookingHistoryProps) {
+export function BookingHistory() {
   const [bookings, setBookings] = useState<BookingSummary[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const activeUserId = userId ?? getStoredSession()?.user.id ?? 'user-demo';
 
   useEffect(() => {
     async function loadBookings() {
       try {
-        const data = await getUserBookings(activeUserId);
+        const data = await getUserBookings();
         setBookings(data);
       } catch {
         setBookings([]);
@@ -26,8 +20,11 @@ export function BookingHistory({ userId }: BookingHistoryProps) {
       }
     }
 
+    const reload = () => void loadBookings();
     void loadBookings();
-  }, [activeUserId]);
+    window.addEventListener(AUTH_STATE_EVENT, reload);
+    return () => window.removeEventListener(AUTH_STATE_EVENT, reload);
+  }, []);
 
   return (
     <div className="rounded-3xl border border-primary/10 bg-surface p-6 shadow-soft sm:p-8">

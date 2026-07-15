@@ -26,10 +26,14 @@ describe('AvailabilityService', () => {
       blocked: true,
     });
 
-    expect(service.isAvailable('apt-1', '2026-08-12', '2026-08-15')).toBe(false);
+    expect(service.isAvailable('apt-1', '2026-08-12', '2026-08-15')).toBe(
+      false,
+    );
   });
 
   it('rejects an invalid date range', () => {
-    expect(() => service.isAvailable('apt-1', '2026-08-20', '2026-08-10')).toThrow(BadRequestException);
+    expect(() =>
+      service.isAvailable('apt-1', '2026-08-20', '2026-08-10'),
+    ).toThrow(BadRequestException);
   });
 });

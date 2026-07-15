@@ -86,14 +86,17 @@ Verified completed work in the current workspace:
 - Duplicate homepage route ownership resolved
 - Frontend production build no longer requires external font downloads
 - Backend e2e smoke test uses an isolated in-memory PostgreSQL-compatible database
+- Persisted TypeORM user identities and revocable authentication sessions
+- Argon2id password hashing
+- Short-lived JWT access tokens and rotated, hashed refresh tokens in HttpOnly cookies
+- Ownership-derived profile and booking-history access
+- Role-protected apartment and availability mutations
+- Global API DTO validation, rate limiting, secure headers, and migration-based auth schema
 
 Verified remaining work:
 
 - Persist bookings in PostgreSQL
 - Expand availability calendar UI with interactive date selection
-- Authentication
-- Authorization
-- User accounts
 - Property owner workflows
 - Admin dashboard
 - Payments
@@ -106,13 +109,14 @@ Verified remaining work:
 - Accessibility audit
 - Performance optimization
 - Testing
-- Production-grade authentication and authorization (the current implementation is an insecure in-memory prototype)
+- Email verification and account recovery
+- Multi-factor authentication and deployment security testing
 - Real PostgreSQL integration testing
 - Deployment
 
 Recommended next milestone:
 
-Create a safe initial Git checkpoint for the verified stabilization work. After that checkpoint, plan production-grade authentication as a separate milestone; do not extend the current prototype.
+Persist bookings in PostgreSQL and link them to the authenticated user identity without expanding into payments or marketplace features.
 
 Roadmap sequence:
 
