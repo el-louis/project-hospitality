@@ -4,7 +4,7 @@ Date: 2026-07-15
 
 ## Scope and Status
 
-Milestone 3 replaces process-local booking and availability maps with PostgreSQL-backed TypeORM entities. The additive migration is implemented and tested locally but is intentionally not applied to Neon or another remote database in this milestone.
+Milestone 3 replaces process-local booking and availability maps with PostgreSQL-backed TypeORM entities. The additive migration is applied to the development Neon branch; production application remains a separate controlled operation.
 
 Payments, marketplace discovery, multi-tenancy, reviews, analytics, identity documents, and channel-manager integration are out of scope.
 
@@ -65,7 +65,9 @@ The backend calculates nights and total amount from the validated dates and the 
 
 Booking creation and manual blocking run inside database transactions. Each transaction obtains a PostgreSQL `pessimistic_write` lock on the apartment row, checks active booking and block overlaps, and writes only if the range remains free.
 
-This serializes competing writes for the same apartment while allowing unrelated apartments to proceed concurrently. The foreign keys, checks, unique reference constraint, and indexes provide durable structural integrity. The isolated pg-mem suite exercises simultaneous requests, while real PostgreSQL lock behavior remains a required pre-production integration check.
+Status changes lock the booking row without loading relations, then load and lock the apartment separately through the same transaction manager. PostgreSQL rejects `FOR UPDATE` applied to the nullable side of the `LEFT JOIN` that TypeORM generates when a relation-loaded booking query is locked. Keeping the locked booking query relation-free preserves row locking for cancellation and every staff lifecycle transition without generating that invalid join.
+
+This serializes competing writes for the same apartment while allowing unrelated apartments to proceed concurrently. The foreign keys, checks, unique reference constraint, and indexes provide durable structural integrity. Real development PostgreSQL verification confirms that simultaneous overlapping requests produce one success and one conflict. pg-mem remains useful for isolated behavior tests but did not reproduce PostgreSQL's outer-join locking restriction, so a structural mock test prevents relation loading from being reintroduced into the locked query.
 
 ## Booking Lifecycle
 
@@ -115,7 +117,7 @@ Expected validation failures use `400`, unavailable overlaps and lifecycle confl
 
 `down()` drops the two milestone-owned tables and booking-status enum. Running it would permanently delete persisted booking and manual-block records, so rollback requires the same backup and review discipline as any destructive database operation.
 
-TypeORM `synchronize` remains disabled. Applying this migration to Neon is a separate, explicitly approved operational step.
+TypeORM `synchronize` remains disabled. The migration is applied only to development Neon; applying it to any other environment requires separate approval.
 
 ## Test Strategy
 

@@ -137,31 +137,36 @@ export class BookingsService {
     reference: string,
     activeUser: AuthenticatedUser,
   ): Promise<BookingSummary> {
-    const booking = await this.findByReference(reference);
-    if (!isStaff(activeUser) && booking.userId !== activeUser.id) {
-      throw new ForbiddenException('You cannot cancel this booking.');
-    }
-    return this.changeStatus(reference, BookingStatus.CANCELLED);
+    return this.changeStatus(reference, BookingStatus.CANCELLED, activeUser);
   }
 
   private async changeStatus(
     reference: string,
     nextStatus: BookingStatus,
+    activeUser?: AuthenticatedUser,
   ): Promise<BookingSummary> {
-    const existing = await this.findByReference(reference);
     return this.dataSource.transaction(async (manager) => {
-      await this.lockApartment(manager, existing.apartmentId);
       const booking = await manager.getRepository(Booking).findOne({
         where: { reference },
-        relations: { apartment: true },
         lock: { mode: 'pessimistic_write' },
       });
       if (!booking) throw new NotFoundException('Booking not found.');
+      if (
+        activeUser &&
+        !isStaff(activeUser) &&
+        booking.userId !== activeUser.id
+      ) {
+        throw new ForbiddenException('You cannot cancel this booking.');
+      }
       if (!isValidTransition(booking.status, nextStatus)) {
         throw new ConflictException(
           `Booking cannot transition from ${booking.status} to ${nextStatus}.`,
         );
       }
+      booking.apartment = await this.lockApartment(
+        manager,
+        booking.apartmentId,
+      );
       booking.status = nextStatus;
       return toSummary(await manager.getRepository(Booking).save(booking));
     });

@@ -400,6 +400,10 @@ describe('Secure authentication foundation (e2e)', () => {
       .post(`/bookings/${created.body.reference}/cancel`)
       .send({})
       .expect(201);
+    await agent
+      .post(`/bookings/${created.body.reference}/cancel`)
+      .send({})
+      .expect(409);
     await request(app.getHttpServer())
       .post('/bookings')
       .send(bookingPayload('2099-11-01', '2099-11-03'))
