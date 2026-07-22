@@ -7,6 +7,7 @@ import { AvailabilityBlock } from '../availability/availability-block.entity';
 import { Booking } from '../bookings/booking.entity';
 import { RedMasaiProfile } from '../red-masai/red-masai-profile.entity';
 import { Offering } from '../offerings/offering.entity';
+import { getDatabaseSslOptions } from './database-ssl.config';
 
 export default new DataSource({
   type: 'postgres',
@@ -15,7 +16,7 @@ export default new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  ssl: getDatabaseSslOptions(process.env.DB_SSL, process.env.DB_HOST),
   entities: [
     Apartment,
     User,

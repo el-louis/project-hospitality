@@ -77,6 +77,8 @@ Register, login, refresh, and password change are rate-limited. Global DTO valid
 - `COOKIE_SECURE`: local HTTPS override; production forces secure cookies.
 - `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_NAME`, `DB_SSL`: PostgreSQL connection.
 
+`DB_SSL` is parsed strictly. `true` enables TLS with Node's trusted system certificate authorities and hostname verification; `false` is accepted only for an explicitly local loopback database. Remote Neon connections must never use `rejectUnauthorized: false`.
+
 See `apps/api/.env.example`. Never commit real values.
 
 ## Database Migration

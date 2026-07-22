@@ -19,6 +19,7 @@ import { RedMasaiModule } from './red-masai/red-masai.module';
 import { Offering } from './offerings/offering.entity';
 import { OfferingsModule } from './offerings/offerings.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { getDatabaseSslOptions } from './database/database-ssl.config';
 
 @Module({
   imports: [
@@ -56,8 +57,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
       migrations: [`${__dirname}/migrations/*{.ts,.js}`],
       migrationsRun: false,
       synchronize: false,
-      ssl:
-        process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      ssl: getDatabaseSslOptions(process.env.DB_SSL, process.env.DB_HOST),
     }),
     ApartmentsModule,
     FeaturesModule,

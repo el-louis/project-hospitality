@@ -119,10 +119,13 @@ Expected validation failures use `400`, unavailable overlaps and lifecycle confl
 
 TypeORM `synchronize` remains disabled. The migration is applied only to development Neon; applying it to any other environment requires separate approval.
 
+Neon client connections pass through Neon's PostgreSQL proxy. A compute-side `pg_stat_ssl` result is therefore not authoritative for the client-to-proxy TLS hop. Runtime and migration CLI connections share strict SSL parsing: remote connections require certificate and hostname verification through the system trust store, and `rejectUnauthorized: false` is prohibited. Client socket authorization is the verification boundary for that hop.
+
 ## Test Strategy
 
 - Unit tests cover strict dates, past-date rejection, half-open turnover, lifecycle transitions, and additive migration consequences.
 - Isolated e2e tests use pg-mem only and never load Neon configuration.
+- The pg-mem data source is independent of the runtime and migration CLI SSL configuration and never opens a remote Neon connection.
 - E2e coverage includes persistence, random unique references, authenticated association, anonymous creation, history ownership, backend totals, invalid dates, overlaps, concurrent requests, cancellation release, manual blocks, authorization, lifecycle transitions, privacy-safe responses, and schema metadata.
 - Backend e2e is run with `--detectOpenHandles`.
 - Backend/frontend lint and production builds remain milestone gates.
