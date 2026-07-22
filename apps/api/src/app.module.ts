@@ -13,6 +13,12 @@ import { AuthModule } from './auth/auth.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { UsersModule } from './users/users.module';
+import { FeaturesModule } from './features/features.module';
+import { RedMasaiProfile } from './red-masai/red-masai-profile.entity';
+import { RedMasaiModule } from './red-masai/red-masai.module';
+import { Offering } from './offerings/offering.entity';
+import { OfferingsModule } from './offerings/offerings.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -38,7 +44,15 @@ import { UsersModule } from './users/users.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Apartment, User, AuthSession, Booking, AvailabilityBlock],
+      entities: [
+        Apartment,
+        User,
+        AuthSession,
+        Booking,
+        AvailabilityBlock,
+        RedMasaiProfile,
+        Offering,
+      ],
       migrations: [`${__dirname}/migrations/*{.ts,.js}`],
       migrationsRun: false,
       synchronize: false,
@@ -46,10 +60,14 @@ import { UsersModule } from './users/users.module';
         process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
     }),
     ApartmentsModule,
+    FeaturesModule,
     AuthModule,
     AvailabilityModule,
     BookingsModule,
     UsersModule,
+    RedMasaiModule,
+    OfferingsModule,
+    DashboardModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

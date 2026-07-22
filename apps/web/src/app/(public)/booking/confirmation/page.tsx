@@ -1,0 +1,7 @@
+import Link from "next/link";
+
+export default async function BookingConfirmationPage({ searchParams }: { searchParams: Promise<{ reference?: string }> }) {
+  const { reference } = await searchParams;
+  const validReference = reference && /^RM-\d{8}-[A-F0-9]{12}$/.test(reference) ? reference : null;
+  return <main className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6"><p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Booking received</p><h1 className="mt-4 text-4xl font-semibold text-text-primary">Your stay request has a reference</h1>{validReference ? <><p className="mt-8 text-sm text-text-secondary">Booking reference returned by the request</p><p className="mt-2 text-3xl font-semibold text-primary">{validReference}</p><p className="mt-6 text-text-secondary">Keep this reference for your records. This page is not final confirmation of the stay; policies and next steps require direct follow-up from Red Masai.</p></> : <p className="mt-6 text-text-secondary">No valid booking reference was provided. Submit the booking form to create a real request.</p>}<div className="mt-10 flex justify-center gap-3"><Link href="/apartments" className="rounded-full border border-primary px-6 py-3 font-semibold text-primary">View stays</Link><Link href="/contact" className="rounded-full bg-primary px-6 py-3 font-semibold text-white">Contact Red Masai</Link></div></main>;
+}

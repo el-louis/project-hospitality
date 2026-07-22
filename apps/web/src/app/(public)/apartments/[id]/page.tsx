@@ -1,6 +1,6 @@
 // apps/web/src/app/apartments/[id]/page.tsx
 import Link from "next/link";
-import { fetchApartment } from "@/lib/api";
+import { fetchApartment, fetchPublicFeatures } from "@/lib/api";
 import type { Apartment } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +13,7 @@ export default async function ApartmentDetailsPage({
   const { id } = await params;
   let apartment: Apartment | null = null;
   let errorMessage = "";
+  const features = await fetchPublicFeatures().catch(() => null);
 
   try {
     apartment = await fetchApartment(id);
@@ -25,11 +26,9 @@ export default async function ApartmentDetailsPage({
       <div className="mx-auto max-w-4xl">
         {apartment ? (
           <div className="overflow-hidden rounded-2xl bg-surface shadow-soft">
-            <img
-              src={apartment.imageUrl || "/apartment-placeholder.jpg"}
-              alt={apartment.title}
-              className="h-96 w-full object-cover"
-            />
+            <div className="flex h-64 items-center justify-center bg-surface-secondary px-6 text-center text-text-secondary" role="img" aria-label={`Image placeholder for ${apartment.title}`}>
+              Approved apartment photography will be added after owner review.
+            </div>
             <div className="p-8">
               <div className="flex flex-wrap items-center gap-4">
                 <h1 className="text-3xl font-semibold text-text-primary">
@@ -68,18 +67,13 @@ export default async function ApartmentDetailsPage({
                 <div>
                   <p className="text-sm text-text-secondary">Max guests</p>
                   <p className="mt-1 font-semibold text-text-primary">
-                    {apartment.maxGuests ?? 2}
+                    {apartment.maxGuests ?? "Owner confirmation required"}
                   </p>
                 </div>
               </div>
 
               <div className="mt-8 flex flex-wrap gap-4">
-                <Link
-                  href={`/booking?apartmentId=${apartment.id}`}
-                  className="rounded-full bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-accent"
-                >
-                  Book now
-                </Link>
+                {features?.onlineBooking ? <Link href={`/booking?apartmentId=${apartment.id}`} className="rounded-full bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-accent">Book now</Link> : <span className="rounded-full bg-surface-secondary px-6 py-3 text-sm text-text-secondary">Online booking unavailable</span>}
                 <Link
                   href="/contact"
                   className="rounded-full border border-primary px-6 py-3 font-semibold text-primary transition-colors hover:bg-primary/10"

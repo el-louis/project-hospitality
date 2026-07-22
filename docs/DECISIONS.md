@@ -1077,3 +1077,27 @@ Good software is built by making clear decisions, documenting them, and improvin
 If a better decision appears in the future, create a new decision rather than rewriting history.
 
 The goal is consistency, learning, and continuous improvement.
+
+---
+
+# DECISION-036
+
+Date: 2026-07-22
+
+Status: Accepted
+Category: Product and Content Architecture
+
+Decision: Build a single-business Red Masai Functional Concept Preview around Stay, Celebrate, Experience and Create. Persist one profile plus non-apartment offerings with internal confidence states. Keep apartment stays on the existing booking engine and route other offerings to enquiry or WhatsApp.
+
+Consequences: owners can correct content without source edits; public pages omit internal labels; no Business, BusinessMembership, tenant switching or non-stay reservation engine is introduced; and a future migration can promote the singleton to Business and offerings to BusinessOffering.
+
+# DECISION-037
+
+Date: 2026-07-22
+
+Status: Accepted
+Category: Feature Management
+
+Decision: Use a local typed environment-backed flag service with safe parsing, explicit public serialization, decorator and backend guard. Flags supplement but never replace authentication or role authorization.
+
+Consequences: future features default disabled, malformed booleans fail closed, public clients cannot inspect internal configuration, and external flag platforms remain deferred.

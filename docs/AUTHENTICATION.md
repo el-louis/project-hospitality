@@ -105,3 +105,9 @@ Unit tests cover hashing, duplicate registration, invalid login, public-user ser
 - Distributed rate-limit storage and session-management UI.
 - Audit-event persistence and security monitoring.
 - Deployment-specific CSP, proxy, HTTPS, and penetration testing.
+
+## Milestone 4A content authorization
+
+Protected Red Masai profile, offering-management and dashboard-summary endpoints require the existing verified session plus `owner` or `admin`. Feature guards (`contentManagement` or `staffDashboard`) never substitute for identity or role checks. Frontend redirects are usability controls only.
+
+Content DTOs reject unknown fields, preventing flags, roles, secrets or auth settings from being written through content APIs. No role headers, localStorage credentials or fallback secrets were introduced.

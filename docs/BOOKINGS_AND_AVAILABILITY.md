@@ -130,3 +130,9 @@ TypeORM `synchronize` remains disabled. The migration is applied only to develop
 ## Deferred Payment Integration
 
 No payment status, processor identifiers, webhooks, checkout flow, or payment events are implemented. The booking total and currency snapshots provide the minimum stable inputs for a separately designed payment milestone. Provider abstraction, idempotency, reconciliation, refunds, and payment-state transitions must be designed before adding payment persistence.
+
+## Milestone 4A feature boundaries
+
+Apartment stays remain the only offering type connected to this booking engine. `onlineBooking` guards `POST /bookings`; `guestBookingHistory`, `bookingManagement` and `availabilityManagement` independently guard their backend capabilities. Existing authentication, ownership, reference generation, locking, overlap prevention, cancellation and rebooking behavior remains unchanged.
+
+Celebrations, experiences and creative shoots use persisted content plus enquiry/WhatsApp actions. They do not create bookings, reserve dates or claim success. Their reservation model is deferred until time-slot, resource, capacity, policy and payment requirements are confirmed.

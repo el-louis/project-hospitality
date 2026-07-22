@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { fetchApartments, submitBooking } from "@/lib/api";
 import { getAvailability } from "@/lib/availability";
@@ -29,11 +30,12 @@ const initialValues: BookingRequest = {
   phone: "",
   checkIn: defaultCheckIn(),
   checkOut: defaultCheckOut(),
-  guests: 2,
+  guests: 1,
   notes: "",
 };
 
 export function BookingForm({ initialApartmentId }: BookingFormProps) {
+  const router = useRouter();
   const [values, setValues] = useState<BookingRequest>({
     ...initialValues,
     apartmentId: initialApartmentId ?? "",
@@ -45,6 +47,10 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<BookingResponse | null>(null);
   const [availabilityMessage, setAvailabilityMessage] = useState("");
+  const selectedApartment = apartments.find(
+    (apartment) => apartment.id === values.apartmentId,
+  );
+  const maximumGuests = selectedApartment?.maxGuests ?? 1;
 
   useEffect(() => {
     fetchApartments()
@@ -90,6 +96,15 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
     setValues((current) => ({
       ...current,
       [name]: name === "guests" ? Number(value) : value,
+      ...(name === "apartmentId"
+        ? {
+            guests: Math.min(
+              current.guests,
+              apartments.find((apartment) => apartment.id === value)
+                ?.maxGuests ?? 1,
+            ),
+          }
+        : {}),
     }));
   };
 
@@ -103,6 +118,8 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
       setResult(response);
       setStatus("success");
       setMessage(response.message);
+      const query = new URLSearchParams({ reference: response.reference });
+      router.push(`/booking/confirmation?${query.toString()}`);
     } catch (error) {
       setStatus("error");
       setMessage(
@@ -140,7 +157,7 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
               required
               value={values.fullName}
               onChange={handleChange}
-              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none ring-0 transition focus:border-primary"
+              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             />
           </label>
 
@@ -152,7 +169,7 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
               required
               value={values.email}
               onChange={handleChange}
-              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none ring-0 transition focus:border-primary"
+              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             />
           </label>
 
@@ -163,7 +180,7 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
               required
               value={values.phone}
               onChange={handleChange}
-              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none ring-0 transition focus:border-primary"
+              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             />
           </label>
 
@@ -173,9 +190,9 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
               name="guests"
               value={values.guests}
               onChange={handleChange}
-              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none ring-0 transition focus:border-primary"
+              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
-              {[1, 2, 3, 4, 5, 6].map((value) => (
+              {Array.from({ length: maximumGuests }, (_, index) => index + 1).map((value) => (
                 <option key={value} value={value}>
                   {value} {value === 1 ? "guest" : "guests"}
                 </option>
@@ -191,7 +208,7 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
               required
               value={values.checkIn}
               onChange={handleChange}
-              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none ring-0 transition focus:border-primary"
+              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             />
           </label>
 
@@ -203,7 +220,7 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
               required
               value={values.checkOut}
               onChange={handleChange}
-              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none ring-0 transition focus:border-primary"
+              className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             />
           </label>
         </div>
@@ -215,7 +232,7 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
             required
             value={values.apartmentId}
             onChange={handleChange}
-            className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none ring-0 transition focus:border-primary"
+            className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <option value="" disabled>
               Choose an apartment
@@ -236,7 +253,7 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
             value={values.notes ?? ""}
             onChange={handleChange}
             placeholder="Tell us about late arrivals, accessibility needs, or special requests."
-            className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm outline-none ring-0 transition focus:border-primary"
+            className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           />
         </label>
 
@@ -272,12 +289,12 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
       <aside className="space-y-6">
         <div className="rounded-3xl border border-primary/10 bg-surface-secondary p-6 shadow-soft">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">
-            Why guests choose us
+            What this request provides
           </p>
           <ul className="mt-6 space-y-4 text-sm text-text-secondary">
-            <li>• Fast confirmation with human support.</li>
-            <li>• Flexible stays with clear pricing.</li>
-            <li>• Thoughtful amenities for work and leisure.</li>
+            <li>• A real booking reference from the API.</li>
+            <li>• A total calculated from the persisted apartment rate.</li>
+            <li>• An availability check before the request is stored.</li>
           </ul>
         </div>
 
@@ -286,9 +303,9 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
             What happens next
           </p>
           <ol className="mt-6 space-y-4 text-sm text-text-secondary">
-            <li>1. We review your dates and availability.</li>
-            <li>2. We send a tailored response within one business day.</li>
-            <li>3. Your stay is confirmed once payment details are shared.</li>
+            <li>1. The API validates the apartment, dates and guest count.</li>
+            <li>2. A pending request and reference are created.</li>
+            <li>3. Red Masai must confirm the stay, policies and next steps directly.</li>
           </ol>
         </div>
 

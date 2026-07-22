@@ -7,6 +7,12 @@ import type {
   BookingSummary,
   ProfileResponse,
   ProfileUpdatePayload,
+  PublicFeatureFlags,
+  RedMasaiProfile,
+  ProtectedRedMasaiProfile,
+  Offering,
+  OfferingCategory,
+  PublicOffering,
 } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -99,4 +105,33 @@ export const cancelBooking = (reference: string) =>
   request<BookingSummary>(`/bookings/${encodeURIComponent(reference)}/cancel`, {
     method: "POST",
     body: "{}",
+  });
+
+export const fetchPublicFeatures = () =>
+  request<PublicFeatureFlags>("/features/public");
+export const fetchRedMasaiProfile = () =>
+  request<RedMasaiProfile>("/red-masai/public");
+export const fetchOfferings = (category?: OfferingCategory) =>
+  request<PublicOffering[]>(
+    `/offerings${category ? `?category=${encodeURIComponent(category)}` : ""}`,
+  );
+export const getManagedProfile = () =>
+  request<ProtectedRedMasaiProfile>("/red-masai");
+export const updateManagedProfile = (
+  payload: Partial<ProtectedRedMasaiProfile>,
+) =>
+  request<ProtectedRedMasaiProfile>("/red-masai", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+export const getManagedOfferings = () => request<Offering[]>("/offerings/manage");
+export const createOffering = (payload: Omit<Offering, "id">) =>
+  request<Offering>("/offerings", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+export const updateOffering = (id: string, payload: Partial<Offering>) =>
+  request<Offering>(`/offerings/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
   });

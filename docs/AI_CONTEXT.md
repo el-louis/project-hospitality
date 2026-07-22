@@ -936,3 +936,11 @@ Support multiple brands.
 Become the leading hospitality management platform in Tanzania, then East Africa, then Africa.
 
 Every decision made today should support that future.
+
+---
+
+# Milestone 4A verified addendum — 2026-07-22
+
+Completed: Red Masai Functional Concept Preview; typed backend-enforced feature flags; persisted singleton profile and non-apartment offerings; protected owner/admin content review; public Stay, Celebrate, Experience and Create journeys; real stay booking confirmation; and enquiry/WhatsApp paths for non-stay offerings.
+
+Remaining before production: owner approval of identity, contacts, location, prices, inventory, capacities, inclusions and policies; controlled application of the Milestone 4A migration to an approved development database; and a separate final brand/visual/photography phase.

@@ -17,6 +17,8 @@ import { RolesGuard } from '../auth/roles.guard';
 import { UserRole } from '../users/user.entity';
 import { AvailabilityService } from './availability.service';
 import { BlockAvailabilityDto } from './dto/block-availability.dto';
+import { FeatureGuard } from '../features/feature.guard';
+import { RequireFeature } from '../features/require-feature.decorator';
 
 @Controller('availability')
 export class AvailabilityController {
@@ -30,7 +32,8 @@ export class AvailabilityController {
   }
 
   @Post(':apartmentId/blocks')
-  @UseGuards(AuthorizationGuard, RolesGuard)
+  @UseGuards(FeatureGuard, AuthorizationGuard, RolesGuard)
+  @RequireFeature('availabilityManagement')
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   blockDates(
     @Param('apartmentId', new ParseUUIDPipe()) apartmentId: string,
@@ -42,7 +45,8 @@ export class AvailabilityController {
 
   @Delete(':apartmentId/blocks/:blockId')
   @HttpCode(204)
-  @UseGuards(AuthorizationGuard, RolesGuard)
+  @UseGuards(FeatureGuard, AuthorizationGuard, RolesGuard)
+  @RequireFeature('availabilityManagement')
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   removeBlock(
     @Param('apartmentId', new ParseUUIDPipe()) apartmentId: string,

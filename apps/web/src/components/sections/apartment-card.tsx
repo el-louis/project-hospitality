@@ -5,17 +5,16 @@ type ApartmentCardProps = {
   apartment: Apartment;
   image?: string;
   availability?: string;
-  rating?: number;
 };
 
-export function ApartmentCard({ apartment, image, availability, rating }: ApartmentCardProps) {
-  const apartmentImage = image || apartment.imageUrl || '/apartment-placeholder.jpg';
+export function ApartmentCard({ apartment, image, availability }: ApartmentCardProps) {
   const cardAvailability = availability || apartment.status || 'Available';
-  const cardRating = rating ?? 4.9;
 
   return (
     <article className="overflow-hidden rounded-2xl border border-primary/10 bg-surface shadow-soft">
-      <img src={apartmentImage} alt={apartment.title} className="h-56 w-full object-cover" />
+      <div className="flex h-40 items-center justify-center bg-surface-secondary px-6 text-center text-sm text-text-secondary" role="img" aria-label={`Image placeholder for ${apartment.title}`}>
+        {image || apartment.imageUrl ? "Apartment image reference available" : "Approved photography pending"}
+      </div>
       <div className="p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -30,7 +29,7 @@ export function ApartmentCard({ apartment, image, availability, rating }: Apartm
         <div className="mt-4 flex flex-wrap gap-4 text-sm text-text-secondary">
           <span>{apartment.bedrooms} bedrooms</span>
           <span>{apartment.bathrooms} bathrooms</span>
-          <span>{apartment.maxGuests ?? 2} guests</span>
+          <span>{apartment.maxGuests ? `${apartment.maxGuests} guests` : "Capacity pending"}</span>
         </div>
 
         <div className="mt-6 flex items-center justify-between">
@@ -38,10 +37,7 @@ export function ApartmentCard({ apartment, image, availability, rating }: Apartm
             <p className="text-sm text-text-secondary">From</p>
             <p className="text-xl font-semibold text-text-primary">${apartment.pricePerNight}/night</p>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-text-secondary">Rating</p>
-            <p className="text-sm font-medium text-text-primary">★ {cardRating.toFixed(1)}</p>
-          </div>
+          <p className="text-right text-xs text-text-secondary">Stored apartment rate</p>
         </div>
 
         <Link

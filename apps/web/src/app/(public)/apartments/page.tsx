@@ -17,10 +17,10 @@ export default async function ApartmentsPage() {
     <main className="min-h-screen bg-background px-4 py-16">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Stay with us</p>
-          <h1 className="mt-3 text-4xl font-semibold text-text-primary sm:text-5xl">Our apartments</h1>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Stay</p>
+          <h1 className="mt-3 text-4xl font-semibold text-text-primary sm:text-5xl">Stay at Red Masai</h1>
           <p className="mx-auto mt-4 max-w-2xl text-text-secondary">
-            Browse available homes designed for comfort, quiet, and effortless travel.
+            Browse the persisted apartment inventory for couples, individuals, small families, friends, local staycations and visitors to Dar es Salaam.
           </p>
         </div>
 

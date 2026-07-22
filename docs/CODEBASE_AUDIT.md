@@ -1,6 +1,6 @@
 # Codebase Audit
 
-Date: 2026-07-15
+Date: 2026-07-22
 
 ## Scope
 
@@ -44,3 +44,11 @@ This audit records the read-only baseline established before the first repositor
 - The Milestone 2 dependency installation reported no known npm vulnerabilities at installation time; ongoing monitoring remains required.
 - System font stacks are used because no approved local font binaries exist and production builds must not require font downloads.
 - The isolated e2e database is an in-memory PostgreSQL-compatible `pg-mem` instance. Real development PostgreSQL verified apartment-lock concurrency and exposed an outer-join `FOR UPDATE` restriction that pg-mem did not model. Status changes therefore lock relation-free booking rows and load apartments separately, protected by a structural regression test.
+
+## Milestone 4A Addendum
+
+- Red Masai profile and non-apartment offerings are database-backed through an additive, currently unapplied migration.
+- Typed feature guards protect booking, availability, dashboard and content capabilities without weakening role authorization.
+- Public routes communicate Stay, Celebrate, Experience and Create; non-stay paths use real contact actions rather than fake reservations.
+- Owner/admin users have a protected content-review interface; ordinary users cannot access its APIs.
+- Seed copy, contact details, location, policies, capacities and most non-stay prices/inclusions require owner review before production.

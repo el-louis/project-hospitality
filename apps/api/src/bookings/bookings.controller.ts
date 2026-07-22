@@ -17,13 +17,16 @@ import { UserRole } from '../users/user.entity';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import { FeatureGuard } from '../features/feature.guard';
+import { RequireFeature } from '../features/require-feature.decorator';
 
 @Controller('bookings')
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
   @Post()
-  @UseGuards(OptionalAuthorizationGuard)
+  @UseGuards(FeatureGuard, OptionalAuthorizationGuard)
+  @RequireFeature('onlineBooking')
   create(
     @Body() bookingRequest: CreateBookingDto,
     @CurrentUser() user?: AuthenticatedUser,
@@ -32,7 +35,8 @@ export class BookingsController {
   }
 
   @Get('me')
-  @UseGuards(AuthorizationGuard)
+  @UseGuards(FeatureGuard, AuthorizationGuard)
+  @RequireFeature('guestBookingHistory')
   getMyBookings(@CurrentUser() user: AuthenticatedUser) {
     return this.bookingsService.getBookingsForUser(user.id);
   }
@@ -47,14 +51,16 @@ export class BookingsController {
   }
 
   @Get()
-  @UseGuards(AuthorizationGuard, RolesGuard)
+  @UseGuards(FeatureGuard, AuthorizationGuard, RolesGuard)
+  @RequireFeature('bookingManagement')
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   listBookings() {
     return this.bookingsService.listBookings();
   }
 
   @Patch(':reference/status')
-  @UseGuards(AuthorizationGuard, RolesGuard)
+  @UseGuards(FeatureGuard, AuthorizationGuard, RolesGuard)
+  @RequireFeature('bookingManagement')
   @Roles(UserRole.OWNER, UserRole.ADMIN)
   updateStatus(
     @Param('reference') reference: string,

@@ -19,6 +19,8 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
+import { FeatureGuard } from '../features/feature.guard';
+import { RequireFeature } from '../features/require-feature.decorator';
 
 type CookieRequest = Omit<Request, 'cookies'> & {
   cookies?: Record<string, string>;
@@ -35,6 +37,8 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @UseGuards(FeatureGuard)
+  @RequireFeature('guestAccounts')
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async register(
     @Body() payload: RegisterDto,

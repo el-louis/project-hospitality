@@ -12,6 +12,7 @@ import { Apartment } from '../src/apartments/apartment.entity';
 import { AvailabilityBlock } from '../src/availability/availability-block.entity';
 import { Booking, BookingStatus } from '../src/bookings/booking.entity';
 import { User, UserRole } from '../src/users/user.entity';
+import { RedMasaiProfile } from '../src/red-masai/red-masai-profile.entity';
 import { TestAppModule } from './test-app.module';
 
 const credentials = {
@@ -25,6 +26,7 @@ describe('Secure authentication foundation (e2e)', () => {
   let app: INestApplication<App> | undefined;
   let usersRepository: Repository<User>;
   let bookingsRepository: Repository<Booking>;
+  let redMasaiRepository: Repository<RedMasaiProfile>;
   let dataSource: DataSource;
   let apartment: Apartment;
 
@@ -34,6 +36,7 @@ describe('Secure authentication foundation (e2e)', () => {
     }).compile();
     usersRepository = moduleFixture.get(getRepositoryToken(User));
     bookingsRepository = moduleFixture.get(getRepositoryToken(Booking));
+    redMasaiRepository = moduleFixture.get(getRepositoryToken(RedMasaiProfile));
     dataSource = moduleFixture.get(DataSource);
     apartment = await dataSource.getRepository(Apartment).save(
       dataSource.getRepository(Apartment).create({
@@ -487,6 +490,162 @@ describe('Secure authentication foundation (e2e)', () => {
       .post(`/bookings/${staffCancellation.body.reference}/cancel`)
       .send({})
       .expect(201);
+    user.role = UserRole.USER;
+    await usersRepository.save(user);
+  });
+
+  it('exposes only approved public flags and fails closed for malformed values', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/features/public')
+      .expect(200);
+    expect(response.body).toEqual({
+      conceptPreview: true,
+      publicWebsite: true,
+      onlineBooking: true,
+      guestAccounts: true,
+      guestBookingHistory: true,
+      whatsappContact: true,
+    });
+    expect(response.body).not.toHaveProperty('contentManagement');
+    expect(response.body).not.toHaveProperty('payments');
+
+    process.env.FEATURE_ONLINE_BOOKING = 'definitely';
+    await request(app.getHttpServer())
+      .post('/bookings')
+      .send(bookingPayload('2098-01-01', '2098-01-03'))
+      .expect(403);
+    delete process.env.FEATURE_ONLINE_BOOKING;
+  });
+
+  it('serves a database-backed privacy-safe public profile and follows the preview flag', async () => {
+    const profile = await request(app.getHttpServer())
+      .get('/red-masai/public')
+      .expect(200);
+    expect(profile.body).toMatchObject({
+      displayName: 'Red Masai Apartments',
+      region: 'Mbezi Beach',
+      previewNotice: expect.stringContaining('Concept Preview'),
+    });
+    expect(profile.body).not.toHaveProperty('fieldConfidence');
+    expect(profile.body).not.toHaveProperty('createdAt');
+
+    process.env.FEATURE_CONCEPT_PREVIEW = 'false';
+    const hidden = await request(app.getHttpServer())
+      .get('/red-masai/public')
+      .expect(200);
+    expect(hidden.body.previewNotice).toBeNull();
+    delete process.env.FEATURE_CONCEPT_PREVIEW;
+
+    await redMasaiRepository.update(1, { whatsapp: '+255712345678' });
+    process.env.FEATURE_WHATSAPP_CONTACT = 'false';
+    const noWhatsapp = await request(app.getHttpServer())
+      .get('/red-masai/public')
+      .expect(200);
+    expect(noWhatsapp.body.whatsapp).toBeNull();
+    delete process.env.FEATURE_WHATSAPP_CONTACT;
+    await redMasaiRepository.update(1, { whatsapp: null });
+  });
+
+  it('returns only active public offerings in order and validates category filters', async () => {
+    const all = await request(app.getHttpServer())
+      .get('/offerings')
+      .expect(200);
+    expect(all.body.map((item: { slug: string }) => item.slug)).toEqual([
+      'private-cinema-experience',
+      'creative-shoots',
+    ]);
+    expect(JSON.stringify(all.body)).not.toMatch(
+      /contentConfidence|OWNER_REQUIRED|ASSUMED_DEMO/,
+    );
+    expect(all.body.every((item: object) => !('id' in item))).toBe(true);
+    const filtered = await request(app.getHttpServer())
+      .get('/offerings?category=CREATE')
+      .expect(200);
+    expect(filtered.body).toHaveLength(1);
+    expect(filtered.body[0].slug).toBe('creative-shoots');
+    await request(app.getHttpServer())
+      .get('/offerings?category=INVALID')
+      .expect(400);
+    await request(app.getHttpServer())
+      .get('/offerings/inactive-event')
+      .expect(404);
+    await request(app.getHttpServer())
+      .get('/offerings/not-a-real-offering')
+      .expect(404);
+  });
+
+  it('keeps content management owner-only and validates protected mutations', async () => {
+    const ordinary = request.agent(app.getHttpServer());
+    await ordinary.post('/auth/login').send(loginPayload()).expect(200);
+    await ordinary.get('/red-masai').expect(403);
+    await ordinary.get('/offerings/manage').expect(403);
+
+    const user = await usersRepository.findOneByOrFail({
+      email: credentials.email,
+    });
+    user.role = UserRole.OWNER;
+    await usersRepository.save(user);
+    const owner = request.agent(app.getHttpServer());
+    await owner.post('/auth/login').send(loginPayload()).expect(200);
+    await owner.get('/red-masai').expect(200);
+    await owner
+      .patch('/red-masai')
+      .send({ instagramUrl: 'not-a-url' })
+      .expect(400);
+    await owner
+      .patch('/red-masai')
+      .send({ timezone: 'Mars/Olympus' })
+      .expect(400);
+    await owner
+      .patch('/red-masai')
+      .send({ defaultCurrency: 'NOPE' })
+      .expect(400);
+    await owner
+      .patch('/red-masai')
+      .send({ featureFlags: { payments: true } })
+      .expect(400);
+    const updated = await owner
+      .patch('/red-masai')
+      .send({ tagline: 'Editable concept tagline' })
+      .expect(200);
+    expect(updated.body.tagline).toBe('Editable concept tagline');
+
+    const created = await owner
+      .post('/offerings')
+      .send({
+        category: 'CREATE',
+        slug: 'owner-test-shoot',
+        title: 'Owner Test Shoot',
+        shortSummary: 'A validated owner test offering.',
+        fullDescription: 'Used only by isolated e2e coverage.',
+        startingPrice: null,
+        currency: 'TZS',
+        pricingNote: null,
+        capacity: null,
+        durationNote: null,
+        includedItems: [],
+        additionalChargeNote: null,
+        bookingMethod: 'ENQUIRY',
+        whatsappAction: true,
+        imageUrl: null,
+        active: true,
+        featured: false,
+        displayOrder: 99,
+        contentConfidence: 'OWNER_REQUIRED',
+      })
+      .expect(201);
+    expect(created.body.contentConfidence).toBe('OWNER_REQUIRED');
+    await owner
+      .patch(`/offerings/${created.body.id}`)
+      .send({ active: false, featured: true })
+      .expect(200);
+
+    process.env.FEATURE_CONTENT_MANAGEMENT = 'false';
+    await owner
+      .patch('/red-masai')
+      .send({ tagline: 'Blocked update' })
+      .expect(403);
+    delete process.env.FEATURE_CONTENT_MANAGEMENT;
     user.role = UserRole.USER;
     await usersRepository.save(user);
   });
