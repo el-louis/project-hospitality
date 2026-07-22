@@ -30,3 +30,13 @@ No Instagram or third-party media has been copied into the repository. Current m
 - Record approval date, approver and allowed channels.
 
 Final optimization, crops, art direction and media storage are deferred until approved assets are supplied.
+
+## Private owner-demo media boundary
+
+Milestone 4C can use a local pack through a typed placement catalogue without committing it. `.gitignore` excludes `apps/web/public/media/red-masai/concept/`; source files contain browser-relative catalogue paths only and never base64 data or tracked derivatives. Only literal `NEXT_PUBLIC_RED_MASAI_DEMO_MEDIA=true` enables it. Public and reproducible builds must leave the value false.
+
+The resolver preserves dimensions and fallbacks if the entire folder or one asset is unavailable. Development-time Next.js optimization is allowed, but no permanent derivative or transcoded video may be tracked. Recognizable guests, screens/posters/broadcasts, brands, food, drinks, decoration, bath styling, games and audio remain review items rather than service or rights claims.
+
+Red Masai concept media is stored locally for private owner demonstration and excluded from Git history. Public publication requires owner confirmation, ownership verification, subject-consent review and replacement or approval of any copyrighted screen, poster, broadcast or audio content.
+
+Ignored files require a separate backup: retain the original ZIP, a private cloud copy and a local laptop or phone copy. Codespaces and GitHub are not media archives. After approval, create a reviewed publishing plan that records rights, allowed channels, consent, apartment/service mapping and replacements before moving approved files into a production media system.

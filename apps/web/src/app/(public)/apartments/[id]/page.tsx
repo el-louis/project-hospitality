@@ -1,6 +1,6 @@
 import { Bath, BedDouble, CheckCircle2, UsersRound } from "lucide-react";
 import Link from "next/link";
-import { MediaPlaceholder } from "@/components/sections/media-placeholder";
+import { ConceptImage } from "@/components/sections/concept-media";
 import { fetchApartment, fetchPublicFeatures } from "@/lib/api";
 import { APARTMENT_BOOKING_CURRENCY, formatMoney } from "@/lib/utils";
 import type { Apartment } from "@/lib/types";
@@ -55,11 +55,42 @@ export default async function ApartmentDetailsPage({
           ← All stays
         </Link>
         <div className="mt-4 grid gap-10 lg:grid-cols-[1.08fr_0.92fr]">
-          <MediaPlaceholder
-            kind="stay"
-            label={`${apartment.title} apartment photography`}
-            className="aspect-[4/3] rounded-[2rem] shadow-lg lg:sticky lg:top-28"
-          />
+          <div>
+            <ConceptImage
+              mediaKey="stayBedroomPrimary"
+              className="aspect-[4/3] rounded-[2rem] shadow-lg"
+              sizes="(max-width: 1024px) 100vw, 54vw"
+              caption="Visual reference for the Red Masai stay experience. Final room mapping requires owner confirmation."
+            />
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              {[
+                "stayBedroomSecondary",
+                "stayLivingRoom",
+                "stayEntertainment",
+                "stayBalcony",
+                "stayBathroomBath",
+                "stayBathroomShower",
+                "stayBathroomToilet",
+                "stayExterior",
+              ].map((mediaKey, index) => (
+                <ConceptImage
+                  key={mediaKey}
+                  mediaKey={mediaKey as
+                    | "stayBedroomSecondary"
+                    | "stayLivingRoom"
+                    | "stayEntertainment"
+                    | "stayBalcony"
+                    | "stayBathroomBath"
+                    | "stayBathroomShower"
+                    | "stayBathroomToilet"
+                    | "stayExterior"}
+                  className="aspect-square rounded-2xl"
+                  sizes="(max-width: 1024px) 50vw, 27vw"
+                  caption={index >= 4 ? "Bathroom detail · concept reference" : undefined}
+                />
+              ))}
+            </div>
+          </div>
           <article className="py-3">
             <p className="text-sm font-bold uppercase tracking-[0.22em] text-primary">
               Private apartment stay
@@ -86,6 +117,11 @@ export default async function ApartmentDetailsPage({
             <p className="mt-8 text-lg leading-8 text-text-secondary">
               {apartment.description ||
                 "Apartment description is awaiting owner review. Contact Red Masai for current details."}
+            </p>
+            <p className="mt-4 rounded-2xl bg-surface-secondary p-4 text-sm leading-6 text-text-secondary">
+              The concept imagery presents the wider Red Masai stay experience.
+              It is not yet confirmed as a room-by-room record of this specific
+              apartment, and pictured items are not amenity promises.
             </p>
             <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {[

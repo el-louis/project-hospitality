@@ -53,3 +53,16 @@ This audit records the read-only baseline established before the first repositor
 - Public routes communicate Stay, Celebrate, Experience and Create; non-stay paths use real contact actions rather than fake reservations.
 - Owner/admin users have a protected content-review interface; ordinary users cannot access its APIs.
 - Seed copy, contact details, location, policies, capacities and most non-stay prices/inclusions require owner review before production.
+
+## Milestone 4C Addendum
+
+- A strict frontend flag and typed catalogue provide local private-demo media without adding ignored assets to Git history.
+- Reusable Next.js image/video fallbacks preserve layouts when media is disabled, missing individually or absent as a directory.
+- The homepage, Stay, Experiences, Celebrate, Create, Gallery, Our Story and Location now have media-led concept narratives with explicit mapping/inclusion caveats.
+- The protected content workspace includes media ownership, consent, inclusion, replacement and audio questions; no asset-management API was added.
+- The Create video is muted by default, controlled, inline, non-autoplaying and reduced-motion-aware.
+- The repository must be validated with `NEXT_PUBLIC_RED_MASAI_DEMO_MEDIA=false` and with the ignored directory temporarily unavailable before a milestone checkpoint.
+
+Material risk remains: recognizable people and copyrighted screen/poster/broadcast/audio content are not publication-cleared. The ignored media is not backed up by GitHub or guaranteed by Codespaces and must be retained separately as the original ZIP, a private cloud copy and a local device copy.
+
+Red Masai concept media is stored locally for private owner demonstration and excluded from Git history. Public publication requires owner confirmation, ownership verification, subject-consent review and replacement or approval of any copyrighted screen, poster, broadcast or audio content.

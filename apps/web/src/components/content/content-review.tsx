@@ -18,6 +18,7 @@ import type {
 } from "@/lib/types";
 import { OfferingEditor, blankOffering } from "./offering-editor";
 import { ProfileEditor } from "./profile-editor";
+import { redMasaiMediaKeys } from "@/lib/red-masai-media";
 
 const reviewGroups = [
   {
@@ -297,6 +298,7 @@ export function ContentReview() {
           })}
         </div>
       </section>
+      <MediaReview />
       <ProfileEditor
         profile={profile}
         saving={saving}
@@ -340,5 +342,72 @@ export function ContentReview() {
         onSave={() => void addOffering()}
       />
     </main>
+  );
+}
+
+const mediaReviewStatuses = [
+  "Media ready for owner review",
+  "Recognizable people visible",
+  "Screen or poster content visible",
+  "Food, drinks or setup shown",
+  "Public permission required",
+  "Replacement recommended",
+] as const;
+
+const mediaReviewQuestions = [
+  "Does Red Masai own or control this media?",
+  "Did the photographer permit website use?",
+  "Did recognizable guests agree to publication?",
+  "May this appear publicly or only in a private preview?",
+  "Are the pictured items included in the service?",
+  "Does each image represent a particular apartment or service?",
+  "May the video’s original audio be used?",
+  "Which images should be replaced?",
+] as const;
+
+function MediaReview() {
+  return (
+    <section
+      aria-labelledby="media-review-heading"
+      className="rounded-3xl border border-border bg-[#f3e4de] p-5 sm:p-7"
+    >
+      <p className="text-sm font-bold uppercase tracking-[0.22em] text-primary">
+        Private media review
+      </p>
+      <h2
+        id="media-review-heading"
+        className="mt-3 text-3xl font-semibold text-text-primary"
+      >
+        Review publication rights and what the images promise
+      </h2>
+      <p className="mt-3 max-w-3xl text-text-secondary">
+        The tracked catalogue contains {redMasaiMediaKeys.length} placement
+        records for locally stored owner-demo media. This checklist does not
+        claim legal clearance or expose the private files through an asset API.
+      </p>
+      <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {mediaReviewStatuses.map((status) => (
+          <div
+            key={status}
+            className="rounded-2xl border border-primary/15 bg-surface p-4 text-sm font-semibold text-text-primary"
+          >
+            {status}
+          </div>
+        ))}
+      </div>
+      <h3 className="mt-8 text-2xl font-semibold text-text-primary">
+        Questions to resolve before publication
+      </h3>
+      <ul className="mt-4 grid gap-3 md:grid-cols-2">
+        {mediaReviewQuestions.map((question) => (
+          <li
+            key={question}
+            className="rounded-2xl bg-surface p-4 text-sm leading-6 text-text-secondary"
+          >
+            {question}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

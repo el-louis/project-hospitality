@@ -1,6 +1,6 @@
 import { ArrowRight, BedDouble, UsersRound } from "lucide-react";
 import Link from "next/link";
-import { MediaPlaceholder } from "./media-placeholder";
+import { ConceptImage } from "./concept-media";
 import { APARTMENT_BOOKING_CURRENCY, formatMoney } from "@/lib/utils";
 import type { Apartment } from "@/lib/types";
 
@@ -17,10 +17,11 @@ export function ApartmentCard({
     availability || apartment.status || "Availability on request";
   return (
     <article className="group overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-      <MediaPlaceholder
-        kind="stay"
-        label={`${apartment.title} apartment`}
+      <ConceptImage
+        mediaKey="stayBedroomPrimary"
         className="aspect-[16/10]"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        caption="Visual reference for the Red Masai stay experience. Final room mapping requires owner confirmation."
       />
       <div className="p-6">
         <div className="flex items-start justify-between gap-4">

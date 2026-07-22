@@ -8,6 +8,8 @@ Date: 2026-07-22
 - Confirm the concept notice is visible and explain that the site is not published as final content.
 - Use demonstration dates and contact data only; do not enter real customer information.
 - Confirm the owner/admin demo account can open `/dashboard/content`.
+- Confirm `NEXT_PUBLIC_RED_MASAI_DEMO_MEDIA=true` only in the private local preview and verify the media folder is ignored and untracked.
+- Confirm the original ZIP also exists in a private backup outside Codespaces.
 
 ## Demonstration flow
 
@@ -19,6 +21,8 @@ Date: 2026-07-22
 6. Open `/dashboard/content` and explain Confirmed, Demo assumption and Owner input needed.
 7. Walk through the grouped identity, contact, apartment, pricing, policy, experience, event, creative, media and location questions.
 8. Return to the public preview to show how approved edits will affect guests.
+9. Review the gallery categories and explain that imagery is a visual reference, not confirmed apartment mapping or package inclusion.
+10. Play the Create video manually, confirm that it starts muted, and ask whether its original audio may ever be published.
 
 ## Questions for the owners
 
@@ -34,7 +38,14 @@ Date: 2026-07-22
 - What event, noise and identification rules apply?
 - Which logo and photographs may be used publicly?
 - What exact address, map pin and direction wording are approved?
+- Does Red Masai own or control each media item, and did the photographer permit website use?
+- Did every recognizable guest agree to publication, and for which channels?
+- Are pictured food, drinks, decoration, bath setup, games or lighting actually included?
+- Which images represent a particular apartment/service, and which should be replaced?
+- May the Create video audio be used?
 
 ## Capture after the meeting
 
 Record every correction with its confidence state, identify content to remove, list missing media with an owner, and distinguish approval from follow-up. Do not silently turn a meeting assumption into confirmed public content.
+
+Red Masai concept media is stored locally for private owner demonstration and excluded from Git history. Public publication requires owner confirmation, ownership verification, subject-consent review and replacement or approval of any copyrighted screen, poster, broadcast or audio content.

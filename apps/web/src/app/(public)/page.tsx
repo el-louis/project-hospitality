@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { ApartmentCard } from "@/components/sections/apartment-card";
-import { MediaPlaceholder } from "@/components/sections/media-placeholder";
+import { ConceptImage } from "@/components/sections/concept-media";
 import { OfferingCard } from "@/components/sections/offering-card";
 import { PublicDataUnavailable } from "@/components/sections/public-data-unavailable";
 import {
@@ -107,13 +107,28 @@ export default async function HomePage() {
               with an enquiry while details are confirmed.
             </p>
           </div>
-          <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
-            <MediaPlaceholder
-              kind="stay"
-              label="Red Masai cover image"
-              className="aspect-[5/4] rounded-[2rem] shadow-[0_28px_70px_rgba(80,46,43,0.16)]"
-            />
-            <div className="absolute -bottom-5 left-4 max-w-64 rounded-2xl bg-surface p-4 shadow-lg sm:left-8">
+          <div className="relative mx-auto w-full max-w-xl pb-12 lg:max-w-none">
+            <div className="media-mosaic aspect-[5/4]">
+              <ConceptImage
+                mediaKey="homeHeroStay"
+                className="rounded-l-[2rem] shadow-[0_28px_70px_rgba(80,46,43,0.16)]"
+                sizes="(max-width: 1024px) 65vw, 34vw"
+                priority
+              />
+              <ConceptImage
+                mediaKey="homeHeroGarden"
+                className="rounded-tr-[2rem]"
+                sizes="(max-width: 1024px) 35vw, 17vw"
+                decorative
+              />
+              <ConceptImage
+                mediaKey="homeHeroCinema"
+                className="rounded-br-[2rem]"
+                sizes="(max-width: 1024px) 35vw, 17vw"
+                decorative
+              />
+            </div>
+            <div className="absolute bottom-2 left-4 max-w-72 rounded-2xl bg-surface/95 p-4 shadow-lg backdrop-blur sm:left-8">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
                 More than a stay
               </p>
@@ -267,10 +282,10 @@ export default async function HomePage() {
               Explore the location <ArrowRight size={17} />
             </Link>
           </div>
-          <MediaPlaceholder
-            kind="location"
-            label="Red Masai location exterior"
+          <ConceptImage
+            mediaKey="homeHeroExterior"
             className="aspect-[16/8] rounded-3xl text-text-primary"
+            sizes="(max-width: 1024px) 100vw, 50vw"
           />
         </div>
       </section>

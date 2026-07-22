@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 const base = process.env.PREVIEW_BASE_URL ?? "http://127.0.0.1:3100";
 const api = process.env.PREVIEW_API_URL ?? "http://127.0.0.1:3101";
+const expectDemoMedia = process.env.EXPECT_DEMO_MEDIA === "true";
 const apartmentResponse = await fetch(`${api}/apartments`);
 assert.equal(apartmentResponse.status, 200, "apartment API must respond");
 const apartments = await apartmentResponse.json();
@@ -47,7 +48,12 @@ const home = await (await fetch(base)).text();
 assert.match(home, /Stay, celebrate and create at Red Masai/);
 assert.match(home, /Concept Preview/);
 assert.match(home, /Book a stay/);
-assert.match(home, /Owner-approved image to follow/);
+if (expectDemoMedia) {
+  assert.match(home, /bedroom-orange-wide\.jpeg/);
+} else {
+  assert.doesNotMatch(home, /\/media\/red-masai\/concept\//);
+  assert.match(home, /Owner-approved image to follow/);
+}
 
 const source = async (...parts) =>
   readFile(join(process.cwd(), ...parts), "utf8");
@@ -62,6 +68,12 @@ const offering = await source(
 const booking = await source("src", "app", "(public)", "booking", "page.tsx");
 const contact = await source("src", "app", "(public)", "contact", "page.tsx");
 const globalCss = await source("src", "app", "globals.css");
+const media = await source(
+  "src",
+  "components",
+  "sections",
+  "concept-media.tsx",
+);
 
 assert.match(header, /aria-expanded=\{open\}/, "mobile menu exposes state");
 assert.match(header, /min-h-11/, "navigation has touch-sized targets");
@@ -95,6 +107,9 @@ assert.match(
   /min-width: 320px/,
   "the layout supports the minimum reviewed width",
 );
+assert.match(media, /prefers-reduced-motion: reduce/);
+assert.match(media, /muted/);
+assert.doesNotMatch(media, /localStorage|sessionStorage/);
 assert.match(
   globalCss,
   /overflow-x: hidden/,

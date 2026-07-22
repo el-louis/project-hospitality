@@ -22,16 +22,16 @@ export default async function CreatePage() {
   return (
     <IntentionPage
       eyebrow="Create"
-      title="A private setting for your next production"
-      introduction="Share your production needs so Red Masai can confirm suitable indoor or outdoor spaces, timing, crew limits, equipment rules and pricing."
+      title="A private setting for lifestyle, food and social content"
+      introduction="Share the moment you want to create so Red Masai can confirm suitable indoor or outdoor space, timing, crew limits, house rules and pricing."
       examples={[
         "Video shoots",
         "Photography",
         "Social-media content",
         "Product shoots",
         "Interviews",
-        "Music productions",
-        "Lifestyle productions",
+        "Food and event content",
+        "Lifestyle content",
       ]}
       offerings={offerings}
       profile={profile}

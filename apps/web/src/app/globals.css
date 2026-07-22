@@ -76,6 +76,68 @@ summary {
   text-wrap: balance;
 }
 
+.concept-media {
+  position: relative;
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  background: var(--color-surface-secondary);
+}
+
+.concept-media > img,
+.concept-media > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.concept-media-caption {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  z-index: 2;
+  border-radius: 0.9rem;
+  padding: 0.55rem 0.75rem;
+  color: #fffaf4;
+  background: rgba(35, 29, 27, 0.78);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  backdrop-filter: blur(8px);
+}
+
+.concept-video {
+  background: #251f1e;
+}
+
+.concept-video > video {
+  object-fit: contain;
+  background: #251f1e;
+}
+
+.media-mosaic {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.media-mosaic > :first-child {
+  grid-row: 1 / 3;
+}
+
+@media (max-width: 639px) {
+  .media-mosaic {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  }
+
+  .concept-media-caption {
+    font-size: 0.7rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

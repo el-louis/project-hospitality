@@ -1,5 +1,5 @@
 import { Camera, Flower2, Home, PartyPopper } from "lucide-react";
-import { MediaPlaceholder } from "@/components/sections/media-placeholder";
+import { ConceptImage } from "@/components/sections/concept-media";
 import { PublicDataUnavailable } from "@/components/sections/public-data-unavailable";
 import { fetchRedMasaiProfile } from "@/lib/api";
 
@@ -54,11 +54,25 @@ export default async function AboutPage() {
               owner correction.
             </p>
           </div>
-          <MediaPlaceholder
-            kind="stay"
-            label="Red Masai story and host image"
-            className="aspect-[4/3] rounded-[2rem] shadow-lg"
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <ConceptImage
+              mediaKey="stayBalcony"
+              className="col-span-2 aspect-[16/10] rounded-[2rem] shadow-lg"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+            />
+            <ConceptImage
+              mediaKey="stayLivingRoom"
+              className="aspect-square rounded-3xl"
+              sizes="(max-width: 1024px) 50vw, 25vw"
+              decorative
+            />
+            <ConceptImage
+              mediaKey="experienceGamesCheckers"
+              className="aspect-square rounded-3xl"
+              sizes="(max-width: 1024px) 50vw, 25vw"
+              decorative
+            />
+          </div>
         </div>
       </section>
       <section className="px-4 py-16 sm:px-6">
@@ -67,8 +81,12 @@ export default async function AboutPage() {
             One setting, four paths
           </p>
           <h2 className="mt-3 text-4xl font-semibold text-text-primary">
-            Designed around what guests want to do
+            Designed around time spent together
           </h2>
+          <p className="mt-4 max-w-3xl text-lg text-text-secondary">
+            Red Masai is about more than sleeping: it is a private setting for
+            conversation, rest, small milestones and creative time.
+          </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {paths.map(([Icon, title, copy]) => (
               <article

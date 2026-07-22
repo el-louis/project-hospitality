@@ -37,3 +37,13 @@ The preview notice follows `conceptPreview`. Booking calls to action and the boo
 ## Production gaps
 
 Owner approval is still required for brand identity, content, contacts, exact location, prices, policies, capacities, inclusions and every photograph. Payments, event reservations, automated messaging and production SEO publication remain deferred.
+
+## Milestone 4C private visual storytelling
+
+Milestone 4C adds an editorial homepage mosaic, bedroom-led Stay references, cinema/garden/relax/play experience stories, celebration imagery, a muted click-to-play Create video, story/location imagery, a category gallery and a protected owner media-review checklist. The booking engine, stored rates and public feature guards are unchanged.
+
+Private imagery is served only from the ignored local `public/media/red-masai/concept` folder when the build-time `NEXT_PUBLIC_RED_MASAI_DEMO_MEDIA` value is exactly `true`. Missing, false and malformed values fail disabled. Disabled or failed assets render the existing concept placeholders at reserved aspect ratios and do not request local URLs. The public repository therefore builds without the media directory.
+
+Video is muted by default, inline, controlled and never autoplayed. Reduced-motion users receive `preload="none"`; all visitors choose whether to play. The poster and media remain local and ignored.
+
+Red Masai concept media is stored locally for private owner demonstration and excluded from Git history. Public publication requires owner confirmation, ownership verification, subject-consent review and replacement or approval of any copyrighted screen, poster, broadcast or audio content.

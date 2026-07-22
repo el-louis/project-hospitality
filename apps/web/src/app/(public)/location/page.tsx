@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MediaPlaceholder } from "@/components/sections/media-placeholder";
+import { ConceptImage } from "@/components/sections/concept-media";
 import { PublicDataUnavailable } from "@/components/sections/public-data-unavailable";
 import { fetchRedMasaiProfile } from "@/lib/api";
 
@@ -57,10 +57,11 @@ export default async function LocationPage() {
             Ask for current directions
           </Link>
         </div>
-        <MediaPlaceholder
-          kind="location"
-          label="Map and Red Masai exterior"
+        <ConceptImage
+          mediaKey="stayExterior"
           className="aspect-square rounded-[2rem] shadow-lg lg:aspect-[5/4]"
+          sizes="(max-width: 1024px) 100vw, 55vw"
+          caption="Exterior visual reference. Contact Red Masai for confirmed directions."
         />
       </div>
     </main>

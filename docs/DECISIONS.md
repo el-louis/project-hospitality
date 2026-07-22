@@ -1105,3 +1105,16 @@ Category: Feature Management
 Decision: Use a local typed environment-backed flag service with safe parsing, explicit public serialization, decorator and backend guard. Flags supplement but never replace authentication or role authorization.
 
 Consequences: future features default disabled, malformed booleans fail closed, public clients cannot inspect internal configuration, and external flag platforms remain deferred.
+
+# DECISION-038
+
+Date: 2026-07-22
+
+Status: Accepted
+Category: Media Privacy and Frontend Architecture
+
+Decision: Keep Red Masai owner-demo media local and ignored, and reference it only through a tracked typed placement catalogue guarded by a strict build-time frontend flag. Only literal `true` enables local browser paths. Reusable image/video components preserve fixed-ratio concept placeholders when disabled or unavailable. The Create video is muted, controlled and never autoplayed.
+
+Consequences: the private Codespaces preview can tell a media-rich story while a public clone builds and runs without the ignored folder; raw paths do not spread through page code; no media, derivative, base64 copy or LFS object enters Git; and catalogue placement does not imply copyright, model consent, apartment mapping or commercial inclusion approval.
+
+Red Masai concept media is stored locally for private owner demonstration and excluded from Git history. Public publication requires owner confirmation, ownership verification, subject-consent review and replacement or approval of any copyrighted screen, poster, broadcast or audio content.
