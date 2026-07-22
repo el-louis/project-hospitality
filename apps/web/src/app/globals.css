@@ -3,34 +3,89 @@
 @tailwind utilities;
 
 :root {
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
-  /* Colors */
-  --color-primary: #0A4D38;
-  --color-secondary: #D4A574;
-  --color-accent: #B87333;
-  --color-surface: #FFFFFF;
-  --color-surface-secondary: #F9F7F4;
-  --color-border: #E8E4E0;
-  --color-text-primary: #2D2D2D;
-  --color-text-secondary: #6B6B6B;
-  --color-disabled: #A0A0A0;
-  --color-success: #2ECC71;
-  --color-warning: #F39C12;
-  --color-error: #E74C3C;
+  --font-sans:
+    "Avenir Next", Avenir, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: Georgia, Cambria, "Times New Roman", serif;
+  --color-primary: #762f3d;
+  --color-secondary: #d8b694;
+  --color-accent: #9b4d3f;
+  --color-surface: #fffdf9;
+  --color-surface-secondary: #f6efe5;
+  --color-border: #dfd1c3;
+  --color-text-primary: #292321;
+  --color-text-secondary: #665c57;
+  --color-disabled: #8a817d;
+  --color-success: #326548;
+  --color-warning: #8a5a16;
+  --color-error: #a22f36;
 }
 
-/* Rest of your CSS */
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
-html,
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
 body {
+  margin: 0;
+  min-width: 320px;
+  overflow-x: hidden;
   font-family: var(--font-sans);
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--color-text-primary);
-  background-color: var(--color-surface);
+  background: var(--color-surface);
+}
+
+h1,
+h2,
+.font-display {
+  font-family: var(--font-serif);
+  letter-spacing: -0.025em;
+}
+
+a,
+button,
+input,
+select,
+textarea,
+summary {
+  outline-color: var(--color-primary);
+  outline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primary) 72%, white);
+}
+
+::selection {
+  color: white;
+  background: var(--color-primary);
+}
+
+.concept-grid {
+  background-image:
+    linear-gradient(rgba(118, 47, 61, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(118, 47, 61, 0.055) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

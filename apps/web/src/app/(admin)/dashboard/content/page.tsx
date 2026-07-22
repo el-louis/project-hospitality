@@ -1,3 +1,5 @@
 import { ContentReview } from "@/components/content/content-review";
 
-export default function DashboardContentPage() { return <ContentReview />; }
+export default function DashboardContentPage() {
+  return <ContentReview />;
+}

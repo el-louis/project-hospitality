@@ -357,6 +357,10 @@ Backend → Railway
 
 Database → Neon
 
+## Milestone 4B visual-preview decision
+
+The owner demonstration uses a temporary warm editorial visual system built from local/system fonts, CSS, existing Lucide icons and neutral media placeholders. It introduces no remote font or copied social media. Public navigation is organized by Stay, Celebrate, Experience and Create; non-stay paths remain enquiries. The concept notice, booking actions and WhatsApp actions continue to follow public flags, with backend enforcement unchanged. Final brand design and production SEO publication require owner approval.
+
 Images → Cloudinary
 
 Reasoning

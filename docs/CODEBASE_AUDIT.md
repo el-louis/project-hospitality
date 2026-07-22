@@ -21,6 +21,7 @@ This audit records the read-only baseline established before the first repositor
 - Apartment records use PostgreSQL through TypeORM.
 - Users and authentication sessions are persisted through TypeORM.
 - Milestone 3 persists bookings and manual availability blocks through reviewed TypeORM entities and an additive migration applied to development Neon.
+- Milestone 4A content is applied to development Neon; Milestone 4B adds a frontend-only visual and owner-demo layer with responsive public paths, neutral media placeholders, accessibility improvements and a grouped protected review experience. No production deployment or backend-domain expansion is included.
 
 ## Verified Working Behavior
 

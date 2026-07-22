@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { fetchApartments, submitBooking } from "@/lib/api";
 import { getAvailability } from "@/lib/availability";
 import type { Apartment, BookingRequest, BookingResponse } from "@/lib/types";
+import { APARTMENT_BOOKING_CURRENCY, formatMoney } from "@/lib/utils";
 
 type BookingFormProps = {
   initialApartmentId?: string;
@@ -51,6 +52,7 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
     (apartment) => apartment.id === values.apartmentId,
   );
   const maximumGuests = selectedApartment?.maxGuests ?? 1;
+  const minimumDate = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
     fetchApartments()
@@ -192,7 +194,10 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
               onChange={handleChange}
               className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
-              {Array.from({ length: maximumGuests }, (_, index) => index + 1).map((value) => (
+              {Array.from(
+                { length: maximumGuests },
+                (_, index) => index + 1,
+              ).map((value) => (
                 <option key={value} value={value}>
                   {value} {value === 1 ? "guest" : "guests"}
                 </option>
@@ -208,6 +213,7 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
               required
               value={values.checkIn}
               onChange={handleChange}
+              min={minimumDate}
               className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             />
           </label>
@@ -220,6 +226,7 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
               required
               value={values.checkOut}
               onChange={handleChange}
+              min={values.checkIn || minimumDate}
               className="mt-2 w-full rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             />
           </label>
@@ -268,8 +275,26 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
           </Button>
         </div>
 
+        {selectedApartment ? (
+          <p className="mt-4 text-sm text-text-secondary">
+            Current rate:{" "}
+            <strong className="text-text-primary">
+              {formatMoney(
+                selectedApartment.pricePerNight,
+                APARTMENT_BOOKING_CURRENCY,
+              )}{" "}
+              per night
+            </strong>
+            . The final total is calculated after date validation.
+          </p>
+        ) : null}
+
         {availabilityMessage || !values.apartmentId ? (
-          <p className="mt-4 rounded-2xl border border-primary/10 bg-primary/5 px-4 py-3 text-sm text-text-secondary">
+          <p
+            role="status"
+            aria-live="polite"
+            className="mt-4 rounded-2xl border border-primary/10 bg-primary/5 px-4 py-3 text-sm text-text-secondary"
+          >
             {availabilityMessage ||
               "Choose an apartment to see its availability."}
           </p>
@@ -293,7 +318,7 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
           </p>
           <ul className="mt-6 space-y-4 text-sm text-text-secondary">
             <li>• A real booking reference from the API.</li>
-            <li>• A total calculated from the persisted apartment rate.</li>
+            <li>• A total calculated in the persisted booking currency.</li>
             <li>• An availability check before the request is stored.</li>
           </ul>
         </div>
@@ -305,7 +330,13 @@ export function BookingForm({ initialApartmentId }: BookingFormProps) {
           <ol className="mt-6 space-y-4 text-sm text-text-secondary">
             <li>1. The API validates the apartment, dates and guest count.</li>
             <li>2. A pending request and reference are created.</li>
-            <li>3. Red Masai must confirm the stay, policies and next steps directly.</li>
+            <li>
+              3. Red Masai must confirm the stay, policies and next steps
+              directly.
+            </li>
+            <li>
+              4. This request does not take payment or confirm a paid stay.
+            </li>
           </ol>
         </div>
 

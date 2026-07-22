@@ -14,6 +14,14 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       profile?.shortDescription ??
       "A functional hospitality concept preview awaiting owner review.",
+    openGraph: {
+      title: `${name} — Digital Experience Concept Preview`,
+      description:
+        profile?.shortDescription ??
+        "A private place to stay, connect, celebrate and create in Mbezi Beach.",
+      type: "website",
+    },
+    robots: { index: false, follow: false },
   };
 }
 
@@ -23,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" data-scroll-behavior="smooth">
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

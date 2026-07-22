@@ -8,4 +8,6 @@ Owners can edit permitted profile fields and their `CONFIRMED`, `ASSUMED_DEMO` o
 
 The required review checklist covers official name, email, phone/WhatsApp, address/map, prices, apartment inventory, capacities, inclusions, deposits, payment methods, cleaning/setup charges, cancellation, event/noise/identification rules, check-in/out and transport definition.
 
+The Milestone 4B interface presents these decisions in owner-friendly groups: identity, contact, apartments, prices, policies, experiences, events, creative shoots, media and location. Raw stored confidence values are translated into “Confirmed by owner,” “Demo assumption” and “Owner input needed.” Colour is supported by icons, labels and counts rather than used alone.
+
 Unknown DTO properties are rejected, so flags, roles, secrets and auth settings cannot be edited through content endpoints. Public profile responses exclude field confidence, IDs and timestamps. Public offerings exclude confidence, inactive records and timestamps. Contact values are nullable; the UI shows an owner-confirmation state instead of inventing them. WhatsApp actions require both a persisted number and enabled flag.

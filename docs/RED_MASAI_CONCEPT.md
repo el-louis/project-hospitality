@@ -33,7 +33,7 @@ Owner confirmation is required for official name, email, phone/WhatsApp, exact a
 
 ## Migration and evolution
 
-`RedMasaiConceptContent1723000000000` creates only the profile, offerings, supporting enums and index. Stable seed IDs plus `ON CONFLICT (id) DO NOTHING` make seeding deterministic. Apartments, bookings, availability, users and sessions are untouched. `synchronize` remains disabled and this milestone does not apply the migration remotely.
+`RedMasaiConceptContent1723000000000` creates only the profile, offerings, supporting enums and index. Stable seed IDs plus `ON CONFLICT (id) DO NOTHING` make seeding deterministic. Apartments, bookings, availability, users and sessions are untouched. `synchronize` remains disabled. The migration was applied to the reviewed development Neon database after a recovery branch and certificate-verified TLS preflight; production remains untouched.
 
 Rollback drops both milestone-owned tables and permanently deletes edited content; it requires backup and review.
 
@@ -42,3 +42,5 @@ Future multi-business work can create Business, copy the singleton into the firs
 ## Deferred
 
 Final brand design, colors, typography, logo, photography, production copy approval, payments/mobile money, event reservations, automated WhatsApp/email, full operations dashboard, multi-business, remote flags and advanced analytics are deferred.
+
+Milestone 4B adds a temporary visual system and owner-demo flow without changing these product boundaries. See `RED_MASAI_VISUAL_PREVIEW.md`, `OWNER_DEMO_CHECKLIST.md` and `MEDIA_REQUIREMENTS.md`.

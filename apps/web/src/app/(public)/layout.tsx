@@ -4,7 +4,11 @@ import { SiteFooter } from "@/components/sections/site-footer";
 import { SiteHeader } from "@/components/sections/site-header";
 import { fetchPublicFeatures, fetchRedMasaiProfile } from "@/lib/api";
 
-export default async function PublicLayout({ children }: { children: ReactNode }) {
+export default async function PublicLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [profile, features] = await Promise.all([
     fetchRedMasaiProfile().catch(() => null),
     fetchPublicFeatures().catch(() => null),
@@ -12,8 +16,13 @@ export default async function PublicLayout({ children }: { children: ReactNode }
 
   return (
     <div className="min-h-screen bg-surface text-text-primary">
-      {features?.conceptPreview ? <ConceptPreviewNotice notice={profile?.previewNotice} /> : null}
-      <SiteHeader displayName={profile?.displayName} />
+      {features?.conceptPreview ? (
+        <ConceptPreviewNotice notice={profile?.previewNotice} />
+      ) : null}
+      <SiteHeader
+        displayName={profile?.displayName}
+        onlineBooking={features?.onlineBooking}
+      />
       {children}
       <SiteFooter profile={profile} />
     </div>

@@ -94,10 +94,7 @@ export type PublicFeatureFlags = {
   whatsappContact: boolean;
 };
 
-export type ContentConfidence =
-  | "CONFIRMED"
-  | "ASSUMED_DEMO"
-  | "OWNER_REQUIRED";
+export type ContentConfidence = "CONFIRMED" | "ASSUMED_DEMO" | "OWNER_REQUIRED";
 
 export type RedMasaiProfile = {
   displayName: string;

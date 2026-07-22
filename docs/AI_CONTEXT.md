@@ -943,4 +943,6 @@ Every decision made today should support that future.
 
 Completed: Red Masai Functional Concept Preview; typed backend-enforced feature flags; persisted singleton profile and non-apartment offerings; protected owner/admin content review; public Stay, Celebrate, Experience and Create journeys; real stay booking confirmation; and enquiry/WhatsApp paths for non-stay offerings.
 
-Remaining before production: owner approval of identity, contacts, location, prices, inventory, capacities, inclusions and policies; controlled application of the Milestone 4A migration to an approved development database; and a separate final brand/visual/photography phase.
+Remaining before production: owner approval of identity, contacts, location, prices, inventory, capacities, inclusions and policies; a separate final brand/visual/photography phase; and a separately approved production migration/deployment plan.
+
+Milestone 4B visual-preview addendum: the development migration is applied; the public concept now uses a warm cream/burgundy temporary system, responsive intent-led navigation, structured owner-approved-media placeholders, feature-aware contact/booking states, explicit non-payment language and grouped owner review. These choices are demo assets, not final brand approval. Owner-approved copy, logo, photography, exact contacts/location and policies remain required.

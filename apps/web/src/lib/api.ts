@@ -124,7 +124,8 @@ export const updateManagedProfile = (
     method: "PATCH",
     body: JSON.stringify(payload),
   });
-export const getManagedOfferings = () => request<Offering[]>("/offerings/manage");
+export const getManagedOfferings = () =>
+  request<Offering[]>("/offerings/manage");
 export const createOffering = (payload: Omit<Offering, "id">) =>
   request<Offering>("/offerings", {
     method: "POST",
